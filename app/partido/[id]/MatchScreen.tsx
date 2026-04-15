@@ -5,6 +5,7 @@ import Link from 'next/link'
 import type { Match, MatchEvent } from '@/data/matches'
 import type { ProcessedMatch, ProcessedPlayer } from '@/lib/processMatch'
 import { formatEventMinute } from '@/lib/formatMinute'
+import { getAnonId } from '@/lib/anonId'
 
 // ── Design tokens ─────────────────────────────────────────────────────────
 const C = {
@@ -52,7 +53,13 @@ function saveVote(entityId: string, value: number): { sum: number; count: number
   localStorage.setItem('tango90_ratings', JSON.stringify(ratings))
   return ratings[entityId]
 }
-
+function cacheMyVote(entityId: string, value: number) {
+  try {
+    const votes = JSON.parse(localStorage.getItem('tango90_myvotes') || '{}')
+    votes[entityId] = value
+    localStorage.setItem('tango90_myvotes', JSON.stringify(votes))
+  } catch {}
+}
 // ── Pitch constants ───────────────────────────────────────────────────────
 const PITCH_W = 336
 const PITCH_H = 568
@@ -88,12 +95,15 @@ function lastName(fullName: string): string {
 
 // ── Types ─────────────────────────────────────────────────────────────────
 type VotingTarget = {
-  entityId: string
-  name: string
-  number?: number
-  position?: string
+  entityId:   string    // "{matchId}_{targetId}" — used as localStorage key
+  matchId:    string    // for API calls
+  targetId:   string    // player/coach/referee id
+  targetType: 'player' | 'coach' | 'referee'
+  name:       string
+  number?:    number
+  position?:  string
   minutesPlayed?: number
-  eligible: boolean
+  eligible:   boolean
 }
 
 type Props = {
@@ -562,9 +572,15 @@ function PlayerChip({ player, matchId, cx, cy, voteSignal, onOpen }: {
   return (
     <button
       onClick={() => onOpen({
-        entityId, name: player.name, number: player.number,
-        position: player.position, minutesPlayed: player.derivedMinutesPlayed,
-        eligible: player.eligibleForVoting,
+        entityId:   entityId,
+        matchId:    matchId,
+        targetId:   player.id,
+        targetType: 'player',
+        name:       player.name,
+        number:     player.number,
+        position:   player.position,
+        minutesPlayed: player.derivedMinutesPlayed,
+        eligible:   player.eligibleForVoting,
       })}
       style={{
         position: 'absolute',
@@ -643,7 +659,15 @@ function CoachRow({ matchId, coach, changes, subsLimit, voteSignal, onOpen }: {
   const displayScore = myVote !== null ? myVote : avg
 
   return (
-    <button onClick={() => onOpen({ entityId, name: coach.name, position: 'DT', eligible: true })}
+    <button onClick={() => onOpen({
+        entityId:   entityId,
+        matchId:    matchId,
+        targetId:   coach.id,
+        targetType: 'coach',
+        name:       coach.name,
+        position:   'DT',
+        eligible:   true,
+      })}
       style={{ width: '100%', background: C.s1, border: `1px solid ${C.border}`, borderRadius: 12, padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer', textAlign: 'left', transition: 'background 120ms' }}>
       <div style={{ flex: 1 }}>
         <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.12em', color: C.text3, marginBottom: 3 }}>DIRECTOR TÉCNICO</div>
@@ -684,7 +708,17 @@ function SubRow({ player, matchId, voteSignal, onOpen }: {
   const displayScore = myVote !== null ? myVote : avg
 
   return (
-    <button onClick={() => onOpen({ entityId, name: player.name, number: player.number, position: player.position, minutesPlayed: player.derivedMinutesPlayed, eligible: player.eligibleForVoting })}
+    <button onClick={() => onOpen({
+        entityId,
+        matchId,
+        targetId:   player.id,
+        targetType: 'player',
+        name:       player.name,
+        number:     player.number,
+        position:   player.position,
+        minutesPlayed: player.derivedMinutesPlayed,
+        eligible:   player.eligibleForVoting,
+      })}
       style={{ width: '100%', background: C.s1, border: `1px solid ${C.border}`, borderRadius: 10, padding: '0 14px', height: 44, display: 'flex', alignItems: 'center', gap: 10, cursor: player.eligibleForVoting ? 'pointer' : 'default', textAlign: 'left', transition: 'background 120ms' }}>
       <div style={{ width: 26, height: 26, borderRadius: '50%', background: C.s2, border: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, color: C.text2, flexShrink: 0 }}>
         {player.number}
@@ -713,7 +747,15 @@ function RefereeRow({ matchId, referee, voteSignal, onOpen }: {
   return (
     <div style={{ marginTop: 24 }}>
       <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.12em', color: C.text3, marginBottom: 8, paddingLeft: 4 }}>ÁRBITRO</div>
-      <button onClick={() => onOpen({ entityId, name: referee.name, position: 'Árbitro principal', eligible: true })}
+      <button onClick={() => onOpen({
+          entityId,
+          matchId,
+          targetId:   referee.id,
+          targetType: 'referee',
+          name:       referee.name,
+          position:   'Árbitro principal',
+          eligible:   true,
+        })}
         style={{ width: '100%', background: C.s1, border: `1px solid ${C.border}`, borderRadius: 12, padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer', textAlign: 'left' }}>
         <div style={{ flex: 1 }}>
           <div style={{ fontSize: 13, fontWeight: 600, color: C.text }}>{referee.name}</div>
@@ -742,45 +784,92 @@ function ScoreBadge({ score, eligible, cta }: { score: number | null; eligible: 
   )
 }
 
-// ── FIX 8: Voting Bottom Sheet — centred on desktop ───────────────────────
+// ── FIX 8: Voting Bottom Sheet — centred on desktop, Supabase-backed ────────
+// ── Voting Bottom Sheet — centred on desktop, Supabase-backed ────────────
+// ── Voting Bottom Sheet — centred on desktop, Supabase-backed ────────────
 const RATINGS = [1,2,3,4,5,6,7,8,9,10]
 const SHEET_MAX_W = 480
 
 function VotingSheet({ target, onClose, onVoteSaved }: {
   target: VotingTarget | null; onClose: () => void; onVoteSaved: () => void
 }) {
-  const [myVote, setMyVote] = useState<number | null>(null)
-  const [stats, setStats]   = useState<{sum:number;count:number}|null>(null)
+  const [myVote,  setMyVote]  = useState<number | null>(null)
+  const [avg,     setAvg]     = useState<number | null>(null)
+  const [count,   setCount]   = useState<number>(0)
+  const [loading, setLoading] = useState(false)
+  const [saving,  setSaving]  = useState(false)
   const [hovered, setHovered] = useState<number | null>(null)
   const isOpen = target !== null
 
   useEffect(() => {
+    // Resetear todo antes de cargar — evita arrastre entre entidades
+    setMyVote(null)
+    setAvg(null)
+    setCount(0)
+    setLoading(false)
+    setSaving(false)
+    setHovered(null)
+
     if (!target) return
-    setMyVote(readVote(target.entityId))
-    setStats(readStats(target.entityId))
+
+    const anonId = getAnonId()
+
+    // Restaurar myVote desde localStorage de inmediato (feedback instantáneo)
+    // No usamos localStorage para avg/count porque puede estar corrupto
+    const localVote = readVote(target.entityId)
+    if (localVote !== null) setMyVote(localVote)
+
+    // Cargar summary real desde Supabase
+    setLoading(true)
+    const qs = new URLSearchParams({
+      match_id:    target.matchId,
+      target_type: target.targetType,
+      target_id:   target.targetId,
+      anon_id:     anonId,
+    })
+    fetch(`/api/votes/summary?${qs}`, { cache: 'no-store' })
+      .then(r => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}`)
+        return r.json()
+      })
+      .then((data: { avg: number | null; count: number; myVote: number | null }) => {
+        // BUG FIX: solo setear si es un número real.
+        // "data.avg !== undefined" permite que null sobreescriba valores válidos.
+        if (typeof data.avg === 'number')             setAvg(data.avg)
+        if (typeof data.count === 'number' && data.count > 0) setCount(data.count)
+        if (data.myVote != null) {
+          setMyVote(data.myVote)
+          // BUG FIX: usar cacheMyVote, no saveVote.
+          // saveVote incrementa el contador local en cada llamada,
+          // corrompiendo tango90_ratings con cada apertura del modal.
+          cacheMyVote(target.entityId, data.myVote)
+        }
+      })
+      .catch(err => console.error('[VotingSheet] summary fetch error:', err))
+      .finally(() => setLoading(false))
   }, [target?.entityId])
 
-  // Block body scroll, preserve position
+  // Bloquear scroll del body, preservando posición
   useEffect(() => {
     if (isOpen) {
       const y = window.scrollY
       document.body.style.overflow = 'hidden'
       document.body.style.position = 'fixed'
-      document.body.style.top = `-${y}px`
-      document.body.style.width = '100%'
+      document.body.style.top      = `-${y}px`
+      document.body.style.width    = '100%'
     } else {
       const y = document.body.style.top
       document.body.style.overflow = ''
       document.body.style.position = ''
-      document.body.style.top = ''
-      document.body.style.width = ''
+      document.body.style.top      = ''
+      document.body.style.width    = ''
       if (y) window.scrollTo(0, parseInt(y) * -1)
     }
     return () => {
       document.body.style.overflow = ''
       document.body.style.position = ''
-      document.body.style.top = ''
-      document.body.style.width = ''
+      document.body.style.top      = ''
+      document.body.style.width    = ''
     }
   }, [isOpen])
 
@@ -791,15 +880,59 @@ function VotingSheet({ target, onClose, onVoteSaved }: {
     return () => window.removeEventListener('keydown', fn)
   }, [isOpen, onClose])
 
-  const handleVote = (val: number) => {
-    if (!target || myVote !== null) return
-    setStats(saveVote(target.entityId, val))
+  const handleVote = async (val: number) => {
+    if (!target || myVote !== null || saving) return
+
+    // Update optimista
     setMyVote(val)
-    onVoteSaved()
+    setSaving(true)
+
+    // Guardar en localStorage y actualizar chips en cancha
+    const cached = saveVote(target.entityId, val)
+    setAvg(cached.sum / cached.count)
+    setCount(cached.count)
+
+    try {
+      const res = await fetch('/api/votes', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          match_id:    target.matchId,
+          target_type: target.targetType,
+          target_id:   target.targetId,
+          score:       val,
+          anon_id:     getAnonId(),
+        }),
+      })
+
+      // Re-fetch summary para mostrar datos reales del servidor
+      if (res.ok || res.status === 409) {
+        const qs = new URLSearchParams({
+          match_id:    target.matchId,
+          target_type: target.targetType,
+          target_id:   target.targetId,
+          anon_id:     getAnonId(),
+        })
+        const s = await fetch(`/api/votes/summary?${qs}`, { cache: 'no-store' })
+        if (s.ok) {
+          const data = await s.json()
+          if (typeof data.avg   === 'number')              setAvg(data.avg)
+          if (typeof data.count === 'number' && data.count > 0) setCount(data.count)
+        }
+      }
+    } catch {
+      // Error de red — localStorage ya actualizado, degradación elegante
+    } finally {
+      setSaving(false)
+      onVoteSaved()
+    }
   }
 
-  const avg      = stats ? stats.sum / stats.count : null
   const hasVoted = myVote !== null
+  // Fallback: si votaste y el servidor todavía no respondió avg/count,
+  // mostrar mínimo el propio voto como referencia
+  const displayAvg   = avg   ?? (hasVoted ? myVote   : null)
+  const displayCount = count  >  0 ? count : (hasVoted ? 1 : 0)
 
   if (typeof window === 'undefined') return null
 
@@ -813,7 +946,7 @@ function VotingSheet({ target, onClose, onVoteSaved }: {
         transition: 'opacity 260ms ease',
       }} />
 
-      {/* FIX 8: panel wrapper — full-width anchored to bottom, inner div centred + max-width */}
+      {/* Panel */}
       <div style={{
         position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 201,
         display: 'flex', justifyContent: 'center',
@@ -828,8 +961,7 @@ function VotingSheet({ target, onClose, onVoteSaved }: {
             width: '100%', maxWidth: SHEET_MAX_W,
             background: C.s1,
             borderRadius: '24px 24px 0 0',
-            border: `1px solid ${C.border}`,
-            borderBottom: 'none',
+            border: `1px solid ${C.border}`, borderBottom: 'none',
             padding: '0 20px 40px',
             maxHeight: '82vh', overflowY: 'auto',
             boxShadow: '0 -16px 48px rgba(0,0,0,0.5)',
@@ -842,6 +974,7 @@ function VotingSheet({ target, onClose, onVoteSaved }: {
 
           {target && (
             <>
+              {/* Info del jugador */}
               <div style={{ marginBottom: 20, marginTop: 4 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                   {target.number !== undefined && (
@@ -849,15 +982,19 @@ function VotingSheet({ target, onClose, onVoteSaved }: {
                       {target.number}
                     </div>
                   )}
-                  <div>
+                  <div style={{ flex: 1 }}>
                     <div style={{ fontSize: 18, fontWeight: 800, color: C.text, letterSpacing: '-0.02em' }}>{target.name}</div>
                     <div style={{ fontSize: 11, color: C.text3, marginTop: 1 }}>
                       {target.position}{target.minutesPlayed !== undefined ? ` · ${Math.round(target.minutesPlayed)}'` : ''}
                     </div>
                   </div>
+                  {loading && !hasVoted && (
+                    <div style={{ width: 16, height: 16, borderRadius: '50%', border: `2px solid ${C.border}`, borderTopColor: C.accent, animation: 'spin 0.7s linear infinite', flexShrink: 0 }} />
+                  )}
                 </div>
               </div>
 
+              {/* Número grande post-voto */}
               {hasVoted && (
                 <div style={{ textAlign: 'center', marginBottom: 20 }}>
                   <span style={{ fontSize: 80, fontWeight: 800, lineHeight: 1, color: ratingBg(myVote!), letterSpacing: '-0.04em', display: 'block' }}>
@@ -866,23 +1003,24 @@ function VotingSheet({ target, onClose, onVoteSaved }: {
                 </div>
               )}
 
+              {/* Botones de rating 1-10 */}
               <div style={{ display: 'flex', gap: 5, marginBottom: 20 }}>
                 {RATINGS.map(n => {
                   const isSelected = myVote === n
-                  const isDimmed = hasVoted && !isSelected
-                  const isHov = hovered === n && !hasVoted
+                  const isDimmed   = hasVoted && !isSelected
+                  const isHov      = hovered === n && !hasVoted
                   return (
                     <button key={n}
                       onClick={() => handleVote(n)}
                       onMouseEnter={() => setHovered(n)}
                       onMouseLeave={() => setHovered(null)}
-                      disabled={hasVoted}
+                      disabled={hasVoted || saving}
                       style={{
                         flex: 1, minWidth: 0, height: 48, borderRadius: 10,
                         border: isSelected ? `2px solid ${ratingBg(n)}` : isHov ? `1px solid ${ratingBg(n)}` : `1px solid ${C.border}`,
                         background: isSelected ? `${ratingBg(n)}22` : isHov ? `${ratingBg(n)}11` : C.s2,
                         color: ratingBg(n), fontSize: 15, fontWeight: 800,
-                        cursor: hasVoted ? 'default' : 'pointer',
+                        cursor: (hasVoted || saving) ? 'default' : 'pointer',
                         opacity: isDimmed ? 0.18 : 1,
                         transition: 'all 100ms ease', padding: 0,
                       }}
@@ -897,11 +1035,12 @@ function VotingSheet({ target, onClose, onVoteSaved }: {
                 </p>
               )}
 
+              {/* Panel de feedback — siempre visible cuando se votó */}
               {hasVoted && (
                 <div style={{ background: C.s2, border: `1px solid ${C.border}`, borderRadius: 12, padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 10 }}>
-                  <FeedbackRow label="TU NOTA"  value={String(myVote)}   color={ratingBg(myVote!)} />
-                  {avg !== null && <FeedbackRow label="PROMEDIO" value={ratingLabel(avg)} color={ratingBg(avg)} />}
-                  {stats && <FeedbackRow label="VOTOS" value={String(stats.count)} />}
+                  <FeedbackRow label="TU NOTA"  value={String(myVote)}                                   color={ratingBg(myVote!)} />
+                  <FeedbackRow label="PROMEDIO" value={ratingLabel(displayAvg!)}  color={ratingBg(displayAvg!)} />
+                  <FeedbackRow label="VOTOS"    value={String(displayCount)} />
                 </div>
               )}
 
@@ -912,10 +1051,11 @@ function VotingSheet({ target, onClose, onVoteSaved }: {
           )}
         </div>
       </div>
+
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </>
   )
 }
-
 function FeedbackRow({ label, value, color }: { label: string; value: string; color?: string }) {
   return (
     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
