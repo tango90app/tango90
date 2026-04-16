@@ -934,7 +934,6 @@ function VotingSheet({ target, onClose, onVoteSaved }: {
   const displayAvg   = avg   ?? (hasVoted ? myVote   : null)
   const displayCount = count  >  0 ? count : (hasVoted ? 1 : 0)
 
-  if (typeof window === 'undefined') return null
 
   return (
     <>

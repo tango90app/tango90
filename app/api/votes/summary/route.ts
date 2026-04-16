@@ -1,40 +1,76 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabaseServer } from '@/lib/supabaseServer'
+import { createClient } from '@supabase/supabase-js'
 
 export const runtime = 'nodejs'
 
+function getServerClient() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY
+  if (!url || !key) throw new Error('Missing Supabase env vars')
+  return createClient(url, key, { auth: { persistSession: false } })
+}
+
 export async function GET(req: NextRequest) {
   const { searchParams } = req.nextUrl
-  const match_id    = searchParams.get('match_id')
-  const target_type = searchParams.get('target_type')
-  const target_id   = searchParams.get('target_id')
-  const anon_id     = searchParams.get('anon_id') ?? ''
+  const match_id    = searchParams.get('match_id')    ?? ''
+  const target_type = searchParams.get('target_type') ?? ''
+  const target_id   = searchParams.get('target_id')   ?? ''
+  const anon_id     = searchParams.get('anon_id')     ?? ''
 
   if (!match_id || !target_type || !target_id) {
-    return NextResponse.json({ error: 'match_id, target_type, target_id are required' }, { status: 400 })
+    return NextResponse.json(
+      { error: 'match_id, target_type, target_id are required' },
+      { status: 400 }
+    )
   }
 
-  // Fetch all votes for this entity
-  const { data, error } = await supabaseServer
+  let db
+  try {
+    db = getServerClient()
+  } catch (e) {
+    return NextResponse.json({ error: 'Server configuration error' }, { status: 500 })
+  }
+
+  // ── DEBUG: fetch by match_id + target_type only, filter target_id in JS ──
+  const { data: partial, error: partialError } = await db
     .from('votes')
-    .select('score, anon_id')
+    .select('score, target_id, anon_id')
     .eq('match_id',    match_id)
     .eq('target_type', target_type)
-    .eq('target_id',   target_id)
 
-  if (error) {
-    console.error('[votes/summary GET] error:', error)
+  if (partialError) {
     return NextResponse.json({ error: 'Database error' }, { status: 500 })
   }
 
-  const votes = data ?? []
-  const count = votes.length
-  const avg   = count > 0 ? votes.reduce((s, v) => s + v.score, 0) / count : null
+  // Log every row's target_id vs the incoming target_id — char by char
+  for (const row of partial ?? []) {
+    const match = row.target_id === target_id
+    console.log(
+      `  row target_id repr: ${JSON.stringify(row.target_id)}`,
+      `| bytes: ${Buffer.from(row.target_id).toString('hex')}`,
+      `| match: ${match}`,
+      `| score: ${row.score}`
+    )
+  }
 
-  // Find the current user's vote if anon_id provided
-  const myVote = anon_id
-    ? (votes.find(v => v.anon_id === anon_id)?.score ?? null)
+  // Filter in JS so we can see what actually matches
+  const matched = (partial ?? []).filter(r => r.target_id === target_id)
+
+  const count = matched.length
+  const avg   = count > 0
+    ? matched.reduce((sum, r) => sum + (r.score as number), 0) / count
     : null
 
-  return NextResponse.json({ avg, count, myVote }, { status: 200 })
+  // myVote
+  let myVote: number | null = null
+  if (anon_id) {
+    const own = matched.find(r => r.anon_id === anon_id)
+    myVote = own?.score ?? null
+  }
+
+  return NextResponse.json({
+    avg,
+    count,
+    myVote
+  })
 }
