@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
 export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
 
 function getServerClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -68,9 +70,18 @@ export async function GET(req: NextRequest) {
     myVote = own?.score ?? null
   }
 
-  return NextResponse.json({
+return NextResponse.json(
+  {
     avg,
     count,
     myVote
-  })
+  },
+  {
+    headers: {
+      'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+      'Pragma': 'no-cache',
+      'Expires': '0'
+    }
+  }
+)
 }
