@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { supabaseServer } from '@/lib/supabaseServer'
 import { getMatchPhase, canVote } from '@/lib/matchPhase'
 import { getVotableSections, computeProgress, type ProgressResult } from '@/lib/voteProgress'
-import { matches } from '@/data/matches'
+import { matches, type Match } from '@/data/matches'
 
 export const runtime = 'nodejs'
 
@@ -56,10 +56,23 @@ export async function POST(req: NextRequest) {
   }
 
   // ── Validación de fase ────────────────────────────────────────────────
-  const match = matches.find(m => m.id === match_id)
-  if (!match) {
-    return NextResponse.json({ error: 'Match not found' }, { status: 404 })
-  }
+  // Buscar primero en Supabase
+const { data: matchRow } = await supabaseServer
+  .from('matches_api')
+  .select('data')
+  .eq('id', match_id)
+  .maybeSingle()
+
+let match: Match | undefined = matchRow?.data
+
+// Fallback a data local
+if (!match) {
+  match = matches.find(m => m.id === match_id)
+}
+
+if (!match) {
+  return NextResponse.json({ error: 'Match not found' }, { status: 404 })
+}
   if (match.status !== 'finished') {
     return NextResponse.json(
       { error: 'Cannot vote on a match that is not finished', code: 'MATCH_NOT_FINISHED' },
