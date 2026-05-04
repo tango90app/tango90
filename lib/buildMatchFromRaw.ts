@@ -10,6 +10,7 @@
 //   - No se usan periods reales (API-Football no los provee).
 
 import type { Match, Team, Player, MatchEvent, MatchRules, MatchPeriod, Position } from '@/data/matches'
+import { getTeamByApiFootballId } from '@/data/teams'
 
 // ── Tipos del raw de API-Football ─────────────────────────────────────────
 
@@ -327,21 +328,24 @@ export function buildMatchFromRaw(row: RawFixtureRow): Match {
     match_end_at = new Date(dateObj.getTime() + duration * 60 * 1000).toISOString()
   }
 
+      const homeTangoTeam = getTeamByApiFootballId(teams.home.id)
+  const awayTangoTeam = getTeamByApiFootballId(teams.away.id)
+
   const homeTeam: Team = {
-    id:        `api-team-${teams.home.id}`,
-    name:      teams.home.name,
-    shortName: teams.home.name.slice(0, 3).toUpperCase(),
-    badge:     '🏟️',
+    id:        homeTangoTeam?.teamKey ?? `api-team-${teams.home.id}`,
+    name:      homeTangoTeam?.officialName ?? teams.home.name,
+    shortName: homeTangoTeam?.abbreviation ?? teams.home.name.slice(0, 3).toUpperCase(),
+    badge:     homeTangoTeam?.crestPath ?? '🏟️',
     score:     goals.home ?? 0,
     players:   buildPlayers(homeLineup, duration),
     coach:     { id: coachId(homeLineup.coach.id), name: homeLineup.coach.name },
   }
 
   const awayTeam: Team = {
-    id:        `api-team-${teams.away.id}`,
-    name:      teams.away.name,
-    shortName: teams.away.name.slice(0, 3).toUpperCase(),
-    badge:     '🏟️',
+    id:        awayTangoTeam?.teamKey ?? `api-team-${teams.away.id}`,
+    name:      awayTangoTeam?.officialName ?? teams.away.name,
+    shortName: awayTangoTeam?.abbreviation ?? teams.away.name.slice(0, 3).toUpperCase(),
+    badge:     awayTangoTeam?.crestPath ?? '🏟️',
     score:     goals.away ?? 0,
     players:   buildPlayers(awayLineup, duration),
     coach:     { id: coachId(awayLineup.coach.id), name: awayLineup.coach.name },

@@ -4,6 +4,9 @@ import { processMatch } from '@/lib/processMatch'
 import { notFound } from 'next/navigation'
 import MatchScreen from './MatchScreen'
 
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
+
 export default async function PartidoPage({ params }: { params: { id: string } }) {
   // 1. buscar en Supabase
 const { data } = await supabaseServer

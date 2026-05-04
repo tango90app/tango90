@@ -3,6 +3,7 @@ import { matches, type Match } from '@/data/matches'
 import { supabaseServer } from '@/lib/supabaseServer'
 import { processMatch, getVotableEntityIds } from '@/lib/processMatch'
 import MatchStatusBadge from '@/components/MatchStatusBadge'
+import { getTeamByApiFootballId } from '@/data/teams'
 
 const PJS = "'Plus Jakarta Sans', sans-serif"
 const OBJ = "'Oswald', sans-serif"
@@ -36,10 +37,27 @@ export default async function Home() {
     .order('updated_at', { ascending: false })
 
   const apiMatches: Match[] = error
-    ? []
-    : (apiRows ?? [])
-        .map(row => row.data as Match)
-        .filter(m => m && m.id && m.date)
+  ? []
+  : (apiRows ?? [])
+      .map(row => row.data as Match)
+      .filter(m => m && m.id && m.date)
+      .map(m => ({
+        ...m,
+        home: {
+          ...m.home,
+          id: getTeamByApiFootballId(Number(String(m.home.id).replace('api-team-', '')))?.teamKey ?? m.home.id,
+          name: getTeamByApiFootballId(Number(String(m.home.id).replace('api-team-', '')))?.displayName ?? m.home.name,
+          shortName: getTeamByApiFootballId(Number(String(m.home.id).replace('api-team-', '')))?.abbreviation ?? m.home.shortName,
+          badge: getTeamByApiFootballId(Number(String(m.home.id).replace('api-team-', '')))?.crestPath ?? m.home.badge,
+        },
+        away: {
+          ...m.away,
+          id: getTeamByApiFootballId(Number(String(m.away.id).replace('api-team-', '')))?.teamKey ?? m.away.id,
+          name: getTeamByApiFootballId(Number(String(m.away.id).replace('api-team-', '')))?.displayName ?? m.away.name,
+          shortName: getTeamByApiFootballId(Number(String(m.away.id).replace('api-team-', '')))?.abbreviation ?? m.away.shortName,
+          badge: getTeamByApiFootballId(Number(String(m.away.id).replace('api-team-', '')))?.crestPath ?? m.away.badge,
+        },
+      }))
 
   const { data: trackedRows } = await supabaseServer
     .from('tracked_fixtures')
@@ -61,23 +79,23 @@ export default async function Home() {
     stadium: '',
     status: 'upcoming',
     home: {
-      id: `api-team-${row.home_team_id}`,
-      name: row.home_name,
-      shortName: row.home_name.slice(0, 3).toUpperCase(),
-      badge: '🏟️',
-      score: 0,
-      players: [],
-      coach: { id: `api-coach-${row.home_team_id}`, name: '' },
-    },
-    away: {
-      id: `api-team-${row.away_team_id}`,
-      name: row.away_name,
-      shortName: row.away_name.slice(0, 3).toUpperCase(),
-      badge: '🏟️',
-      score: 0,
-      players: [],
-      coach: { id: `api-coach-${row.away_team_id}`, name: '' },
-    },
+  id: getTeamByApiFootballId(row.home_team_id)?.teamKey ?? `api-team-${row.home_team_id}`,
+  name: getTeamByApiFootballId(row.home_team_id)?.displayName ?? row.home_name,
+  shortName: getTeamByApiFootballId(row.home_team_id)?.abbreviation ?? row.home_name.slice(0, 3).toUpperCase(),
+  badge: getTeamByApiFootballId(row.home_team_id)?.crestPath ?? '🏟️',
+  score: 0,
+  players: [],
+  coach: { id: `api-coach-${row.home_team_id}`, name: '' },
+},
+away: {
+  id: getTeamByApiFootballId(row.away_team_id)?.teamKey ?? `api-team-${row.away_team_id}`,
+  name: getTeamByApiFootballId(row.away_team_id)?.displayName ?? row.away_name,
+  shortName: getTeamByApiFootballId(row.away_team_id)?.abbreviation ?? row.away_name.slice(0, 3).toUpperCase(),
+  badge: getTeamByApiFootballId(row.away_team_id)?.crestPath ?? '🏟️',
+  score: 0,
+  players: [],
+  coach: { id: `api-coach-${row.away_team_id}`, name: '' },
+},
     referee: { id: `api-ref-${row.external_fixture_id}`, name: '' },
     rules: {
       normalSubstitutionsLimit: 5,
