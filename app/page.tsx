@@ -41,7 +41,58 @@ export default async function Home() {
         .map(row => row.data as Match)
         .filter(m => m && m.id && m.date)
 
-  const allMatches: Match[] = [...apiMatches, ...matches]
+  const { data: trackedRows } = await supabaseServer
+    .from('tracked_fixtures')
+    .select('*')
+    .eq('published', false)
+    .order('kickoff_at', { ascending: true })
+
+  const trackedMatches: Match[] = (trackedRows ?? []).map((row: any) => ({
+    id: row.internal_match_id,
+    date: row.fixture_date,
+    time: new Date(row.kickoff_at).toLocaleTimeString('es-AR', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+      timeZone: 'America/Argentina/Buenos_Aires',
+    }),
+    tournament: 'Liga Profesional Argentina',
+    round: 'Próximo',
+    stadium: '',
+    status: 'upcoming',
+    home: {
+      id: `api-team-${row.home_team_id}`,
+      name: row.home_name,
+      shortName: row.home_name.slice(0, 3).toUpperCase(),
+      badge: '🏟️',
+      score: 0,
+      players: [],
+      coach: { id: `api-coach-${row.home_team_id}`, name: '' },
+    },
+    away: {
+      id: `api-team-${row.away_team_id}`,
+      name: row.away_name,
+      shortName: row.away_name.slice(0, 3).toUpperCase(),
+      badge: '🏟️',
+      score: 0,
+      players: [],
+      coach: { id: `api-coach-${row.away_team_id}`, name: '' },
+    },
+    referee: { id: `api-ref-${row.external_fixture_id}`, name: '' },
+    rules: {
+      normalSubstitutionsLimit: 5,
+      normalWindowsLimit: 3,
+      extraTimeEnabled: false,
+      extraTimeAdditionalSubs: 1,
+      extraTimeAdditionalWindow: 1,
+      concussionSubsEnabled: false,
+      concussionSubsUsedHome: 0,
+      concussionSubsUsedAway: 0,
+    },
+    events: [],
+  }))
+
+  const allMatches: Match[] = [...trackedMatches, ...apiMatches, ...matches]
 
   const byDate: Record<string, Match[]> = {}
   for (const m of allMatches) {
