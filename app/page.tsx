@@ -183,7 +183,7 @@ away: {
                     marginBottom: 8,
                     padding: '14px 16px',
                     display: 'flex',
-                    alignItems: 'center',
+                    alignItems: 'stretch',
                     gap: 12,
                     cursor: 'pointer',
                     transition: 'border-color 0.15s, background 0.15s',
@@ -196,40 +196,70 @@ away: {
                     </div>
                   </div>
 
-                  <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 8 }}>
-                    {/* Home */}
-                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 1 }}>
-                      <span style={{ fontFamily: OBJ, fontSize: 16, fontWeight: 600, color: '#FFFFFF', whiteSpace: 'nowrap' }}>
-                        {match.home.shortName}
-                      </span>
-                      <span style={{ fontSize: 10, color: '#6B7280', whiteSpace: 'nowrap', fontFamily: PJS }}>{match.home.name}</span>
-                    </div>
+                  <div style={{
+  flex: 1,
+  display: 'grid',
+  gridTemplateColumns: '1fr 26px 76px 26px 1fr',
+  alignItems: 'center',
+  columnGap: 8,
+  height: '100%',
+}}>
+  {/* Home */}
+  <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 6, minWidth: 0 }}>
+    <span style={{ fontFamily: OBJ, fontSize: 16, fontWeight: 600, color: '#FFFFFF', whiteSpace: 'nowrap' }}>
+      {match.home.shortName}
+    </span>
+  </div>
 
-                    {/* Score */}
-                    <div style={{ display: 'flex', alignItems: 'center', minWidth: 72, justifyContent: 'center' }}>
-                      {match.status === 'upcoming' ? (
-                        <span style={{ fontFamily: OBJ, fontSize: 20, fontWeight: 700, color: '#1A1A22', letterSpacing: '0.1em' }}>VS</span>
-                      ) : (
-                        <>
-                          <span style={{ fontFamily: OBJ, fontSize: 28, fontWeight: 700, color: '#FFFFFF', minWidth: 24, textAlign: 'center' }}>
-                            {match.home.score}
-                          </span>
-                          <span style={{ fontFamily: OBJ, fontSize: 18, color: 'rgba(255,255,255,0.2)', padding: '0 4px' }}>–</span>
-                          <span style={{ fontFamily: OBJ, fontSize: 28, fontWeight: 700, color: '#FFFFFF', minWidth: 24, textAlign: 'center' }}>
-                            {match.away.score}
-                          </span>
-                        </>
-                      )}
-                    </div>
+  {/* Home crest */}
+  <div style={{ width: 24, height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+    {String(match.home.badge).startsWith('/') ? (
+      <img src={match.home.badge} alt="" style={{ width: 22, height: 22, objectFit: 'contain' }} />
+    ) : (
+      <span style={{ fontSize: 18 }}>{match.home.badge}</span>
+    )}
+  </div>
 
-                    {/* Away */}
-                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 1 }}>
-                      <span style={{ fontFamily: OBJ, fontSize: 16, fontWeight: 600, color: '#FFFFFF', whiteSpace: 'nowrap' }}>
-                        {match.away.shortName}
-                      </span>
-                      <span style={{ fontSize: 10, color: '#6B7280', whiteSpace: 'nowrap', fontFamily: PJS }}>{match.away.name}</span>
-                    </div>
-                  </div>
+  {/* Center score / VS */}
+  <div style={{
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    minWidth: 76,
+  }}>
+    {match.status === 'upcoming' ? (
+      <span style={{ fontFamily: OBJ, fontSize: 18, fontWeight: 700, color: 'rgba(255,255,255,0.18)', letterSpacing: '0.08em' }}>
+        VS
+      </span>
+    ) : (
+      <>
+        <span style={{ fontFamily: OBJ, fontSize: 26, fontWeight: 700, color: '#FFFFFF', minWidth: 22, textAlign: 'center' }}>
+          {match.home.score}
+        </span>
+        <span style={{ fontFamily: OBJ, fontSize: 18, color: 'rgba(255,255,255,0.25)', padding: '0 6px' }}>–</span>
+        <span style={{ fontFamily: OBJ, fontSize: 26, fontWeight: 700, color: '#FFFFFF', minWidth: 22, textAlign: 'center' }}>
+          {match.away.score}
+        </span>
+      </>
+    )}
+  </div>
+
+  {/* Away crest */}
+  <div style={{ width: 24, height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+    {String(match.away.badge).startsWith('/') ? (
+      <img src={match.away.badge} alt="" style={{ width: 22, height: 22, objectFit: 'contain' }} />
+    ) : (
+      <span style={{ fontSize: 18 }}>{match.away.badge}</span>
+    )}
+  </div>
+
+  {/* Away */}
+  <div style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center', gap: 6, minWidth: 0 }}>
+    <span style={{ fontFamily: OBJ, fontSize: 16, fontWeight: 600, color: '#FFFFFF', whiteSpace: 'nowrap' }}>
+      {match.away.shortName}
+    </span>
+  </div>
+</div>
 
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                     {match.status === 'live' && <LiveBadge />}
