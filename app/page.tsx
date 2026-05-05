@@ -32,7 +32,44 @@ function formatDate(dateStr: string) {
   const d = new Date(dateStr + 'T00:00:00')
   return d.toLocaleDateString('es-AR', { weekday: 'short', day: 'numeric', month: 'short' }).toUpperCase()
 }
+const COMPETITIONS = [
+  {
+    key: 'lpf',
+    label: 'LPF',
+    title: 'LIGA PROFESIONAL DE FÚTBOL',
+    logos: ['/logos/competitions/afa.svg', '/logos/competitions/lpf.svg'],
+  },
+  {
+    key: 'libertadores',
+    label: 'COPA LIBERTADORES',
+    title: 'CONMEBOL LIBERTADORES',
+    logos: [],
+  },
+  {
+    key: 'sudamericana',
+    label: 'COPA SUDAMERICANA',
+    title: 'COPA CONMEBOL SUDAMERICANA',
+    logos: [],
+  },
+  {
+    key: 'mundial',
+    label: 'FIFA WORLD CUP',
+    title: 'COPA MUNDIAL de la FIFA',
+    logos: [],
+  },
+] as const
 
+type CompetitionKey = typeof COMPETITIONS[number]['key']
+
+function getCompetitionKey(match: Match): CompetitionKey {
+  const text = `${match.tournament ?? ''} ${match.round ?? ''}`.toLowerCase()
+
+  if (text.includes('libertadores')) return 'libertadores'
+  if (text.includes('sudamericana')) return 'sudamericana'
+  if (text.includes('world cup') || text.includes('mundial')) return 'mundial'
+
+  return 'lpf'
+}
 function getMatchTimeLabel(match: Match) {
   if (match.status === 'upcoming') {
     return match.time
@@ -57,7 +94,13 @@ function getMatchTimeLabel(match: Match) {
 
   return ''
 }
-export default async function Home() {
+type HomeProps = {
+  searchParams?: {
+    competition?: string
+  }
+}
+
+export default async function Home({ searchParams }: HomeProps) {
   noStore()
 
   const { data: apiRows, error } = await supabaseServer
@@ -111,7 +154,7 @@ away: normalizeTeam(m.away),
       hour12: false,
       timeZone: 'America/Argentina/Buenos_Aires',
     }),
-    tournament: 'Liga Profesional Argentina',
+    tournament: row.league_name ?? 'Liga Profesional Argentina',
     round: 'Próximo',
     stadium: '',
     status: 'upcoming',
@@ -149,9 +192,27 @@ away: {
 
   const allMatches: Match[] = [...trackedMatches, ...apiMatches]
 
+  const activeCompetitionKey = (
+  searchParams?.competition &&
+  COMPETITIONS.some(c => c.key === searchParams.competition)
+    ? searchParams.competition
+    : 'lpf'
+) as CompetitionKey
+
+const activeCompetition =
+  COMPETITIONS.find(c => c.key === activeCompetitionKey) ?? COMPETITIONS[0]
+
+const visibleCompetitions = COMPETITIONS.filter(competition =>
+  allMatches.some(match => getCompetitionKey(match) === competition.key)
+)
+
+const filteredMatches = allMatches.filter(match =>
+  getCompetitionKey(match) === activeCompetitionKey
+)
+
 
   const byDate: Record<string, Match[]> = {}
-  for (const m of allMatches) {
+  for (const m of filteredMatches) {
     if (!m || !m.date) continue
     if (!byDate[m.date]) byDate[m.date] = []
     byDate[m.date].push(m)
@@ -189,32 +250,77 @@ away: {
     style={{ height: 22, width: 'auto', display: 'block' }}
   />
 </a>
-        <button
-  aria-label="Abrir menú"
-  style={{
-    width: 32,
-    height: 32,
-    border: 'none',
-    background: 'transparent',
-    padding: 0,
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: 5,
-    cursor: 'pointer',
-  }}
->
-  <span style={{ width: 22, height: 2, background: '#9CA3AF', borderRadius: 2 }} />
-  <span style={{ width: 22, height: 2, background: '#9CA3AF', borderRadius: 2 }} />
-  <span style={{ width: 22, height: 2, background: '#9CA3AF', borderRadius: 2 }} />
-</button>
+        <div style={{ position: 'relative' }}>
+  <button
+    popoverTarget="competition-menu"
+    aria-label="Abrir menú"
+    style={{
+      width: 32,
+      height: 32,
+      border: 'none',
+      background: 'transparent',
+      padding: 0,
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: 'center',
+      alignItems: 'center',
+      gap: 5,
+      cursor: 'pointer',
+    }}
+  >
+    <span style={{ width: 22, height: 2, background: '#9CA3AF', borderRadius: 2 }} />
+    <span style={{ width: 22, height: 2, background: '#9CA3AF', borderRadius: 2 }} />
+    <span style={{ width: 22, height: 2, background: '#9CA3AF', borderRadius: 2 }} />
+  </button>
+
+  <div
+    id="competition-menu"
+    popover="auto"
+    style={{
+      position: 'fixed',
+      inset: 'unset',
+      top: 56,
+      right: 'calc((100vw - min(480px, 100vw)) / 2 + 16px)',
+      width: 210,
+      background: '#121218',
+      border: '1px solid rgba(255,255,255,0.10)',
+      borderRadius: 12,
+      padding: 6,
+      boxShadow: '0 18px 45px rgba(0,0,0,0.45)',
+      zIndex: 200,
+      margin: 0,
+    }}
+  >
+    {COMPETITIONS.map(c => (
+      <Link
+        key={c.key}
+        href={`/?competition=${c.key}`}
+        style={{
+          display: 'block',
+          textDecoration: 'none',
+          padding: '10px 12px',
+          borderRadius: 8,
+          fontFamily: PJS,
+          fontSize: 12,
+          fontWeight: 700,
+          letterSpacing: '0.06em',
+          textAlign: 'right',
+          color: c.key === activeCompetitionKey ? '#FBD005' : '#E5E7EB',
+          background: c.key === activeCompetitionKey ? 'rgba(251,208,5,0.10)' : 'transparent',
+        }}
+      >
+        {c.label}
+      </Link>
+    ))}
+  </div>
+</div>
         </div>
 </header>
 
       {/* Content */}
       <div style={{ maxWidth: 480, margin: '0 auto', padding: '0 16px', paddingBottom: 48 }}>
         {/* Section label */}
+        
 <div style={{ padding: '20px 0 14px', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
   <div style={{
     display: 'flex',
@@ -226,9 +332,15 @@ away: {
     color: '#6B7280',
     letterSpacing: '0.14em',
   }}>
-    <img src="/logos/competitions/afa.svg" alt="" style={{ width: 36, height: 36, objectFit: 'contain' }} />
-      <img src="/logos/competitions/lpf.svg" alt="" style={{ width: 36, height: 36, objectFit: 'contain' }} />
-    <span>LIGA PROFESIONAL DE FÚTBOL</span>
+    {activeCompetition.logos.map((logo, i) => (
+  <img
+    key={i}
+    src={logo}
+    alt=""
+    style={{ width: 36, height: 36, objectFit: 'contain' }}
+  />
+))}
+    <span>{activeCompetition.title}</span>
   </div>
 
   <div style={{
