@@ -9,6 +9,7 @@ import { getAnonId } from '@/lib/anonId'
 import { getMatchPhase, canVote, formatRemainingTime } from '@/lib/matchPhase'
 import type { PlaqueMeta } from '@/app/api/votes/route'
 import type { EntityAverage, MatchAveragesResponse } from '@/app/api/votes/match-averages/route'
+import AdSlot from '@/components/AdSlot'
 
 // ── Design tokens ─────────────────────────────────────────────────────────
 const C = {
@@ -111,6 +112,14 @@ function formatPlayerShortName(fullName: string): string {
   const firstInitial = parts[0][0]
   const lastName = parts.slice(1).join(' ')
   return `${firstInitial}. ${lastName}`
+}
+
+function formatCompetitionName(name: string) {
+  if (name === 'Liga Profesional Argentina') {
+    return 'LIGA PROFESIONAL DE FÚTBOL'
+  }
+
+  return name.toUpperCase()
 }
 
 function ratingColor(score: number) {
@@ -297,6 +306,10 @@ export default function MatchScreen({ match, processed }: Props) {
       {/* ── Match Header ─────────────────────────────────────────────────── */}
       <MatchHeader match={match} processed={processed} />
 
+      <div style={{ maxWidth: MAX_W, margin: '0 auto', padding: '0 16px' }}>
+  <AdSlot />
+</div>
+
       {/* ── Team Tabs — sticky below compact header ───────────────────────── */}
       <div
         ref={tabsRef}
@@ -344,6 +357,8 @@ export default function MatchScreen({ match, processed }: Props) {
               onOpen={openVoting}
             />
 
+            <AdSlot />
+
             <div style={{ marginTop: 16 }}>
               <CoachRow
                 matchId={match.id}
@@ -372,6 +387,9 @@ export default function MatchScreen({ match, processed }: Props) {
               phase={phase}
               onOpen={openVoting}
             />
+
+            <AdSlot type="large" />
+            
           </>
         )}
       </div>
@@ -426,7 +444,7 @@ function MatchHeader({ match, processed }: { match: Match; processed: ProcessedM
 
         <div style={{ textAlign: 'center', marginBottom: 14 }}>
           <p style={{ margin: 0, fontSize: 10, fontWeight: 700, letterSpacing: '0.14em', color: C.text3, textTransform: 'uppercase' }}>
-            {match.tournament}
+            {formatCompetitionName(match.tournament)}
           </p>
           <p style={{ margin: '2px 0 0', fontSize: 11, color: C.text3 }}>
             {match.round} · {match.stadium}

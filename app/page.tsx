@@ -4,7 +4,8 @@ import { matches, type Match } from '@/data/matches'
 import { supabaseServer } from '@/lib/supabaseServer'
 import { processMatch, getVotableEntityIds } from '@/lib/processMatch'
 import MatchStatusBadge from '@/components/MatchStatusBadge'
-import { getTeamByApiFootballId } from '@/data/teams'
+import { getTeamByApiFootballId, getTeamByKey } from '@/data/teams'
+import AdSlot from '@/components/AdSlot'
 
 const PJS = "'Plus Jakarta Sans', sans-serif"
 const OBJ = "'Plus Jakarta Sans', sans-serif"
@@ -64,27 +65,30 @@ export default async function Home() {
     .select('data')
     .order('updated_at', { ascending: false })
 
-  const apiMatches: Match[] = error
+  const normalizeTeam = (team: any) => {
+  const apiId = Number(String(team.id).replace('api-team-', ''))
+
+  const mapped = Number.isFinite(apiId)
+    ? getTeamByApiFootballId(apiId) ?? getTeamByKey(team.id)
+    : getTeamByKey(team.id)
+
+  return {
+    ...team,
+    id: mapped?.teamKey ?? team.id,
+    name: mapped?.displayName ?? team.name,
+    shortName: mapped?.abbreviation ?? team.shortName,
+    badge: mapped?.crestPath ?? team.badge,
+  }
+}
+    const apiMatches: Match[] = error
   ? []
   : (apiRows ?? [])
       .map(row => row.data as Match)
       .filter(m => m && m.id && m.date)
       .map(m => ({
         ...m,
-        home: {
-          ...m.home,
-          id: getTeamByApiFootballId(Number(String(m.home.id).replace('api-team-', '')))?.teamKey ?? m.home.id,
-          name: getTeamByApiFootballId(Number(String(m.home.id).replace('api-team-', '')))?.displayName ?? m.home.name,
-          shortName: getTeamByApiFootballId(Number(String(m.home.id).replace('api-team-', '')))?.abbreviation ?? m.home.shortName,
-          badge: getTeamByApiFootballId(Number(String(m.home.id).replace('api-team-', '')))?.crestPath ?? m.home.badge,
-        },
-        away: {
-          ...m.away,
-          id: getTeamByApiFootballId(Number(String(m.away.id).replace('api-team-', '')))?.teamKey ?? m.away.id,
-          name: getTeamByApiFootballId(Number(String(m.away.id).replace('api-team-', '')))?.displayName ?? m.away.name,
-          shortName: getTeamByApiFootballId(Number(String(m.away.id).replace('api-team-', '')))?.abbreviation ?? m.away.shortName,
-          badge: getTeamByApiFootballId(Number(String(m.away.id).replace('api-team-', '')))?.crestPath ?? m.away.badge,
-        },
+        home: normalizeTeam(m.home),
+away: normalizeTeam(m.away),
       }))
 
   const { data: trackedRows } = await supabaseServer
@@ -355,8 +359,14 @@ away: {
                 </div>
               </Link>
             ))}
+
+            <AdSlot />
+
           </div>
         ))}
+
+        <AdSlot type="large" />
+        
       </div>
 
       <style>{`
