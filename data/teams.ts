@@ -150,7 +150,7 @@ export const TEAMS: TangoTeam[] = [
     officialName: 'Club Atlético Belgrano',
     displayName: 'Belgrano',
     abbreviation: 'CAB',
-    crestPath: '/logos/teams/belgrano.svg',
+    crestPath: '/logos/teams/belgrano_cba.svg',
     primaryColor: '#75AADB',
     secondaryColor: '#000000',
   },

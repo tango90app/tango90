@@ -319,7 +319,9 @@ export function buildMatchFromRaw(row: RawFixtureRow): Match {
   const duration = matchDuration(fx.status.short)
 
   const dateObj = new Date(fx.date)
-  const date    = fx.date.slice(0, 10)
+  const date = new Date(fx.date).toLocaleDateString('sv-SE', {
+  timeZone: 'America/Argentina/Buenos_Aires',
+})
   const time    = dateObj.toTimeString().slice(0, 5)
 
   // match_end_at: fecha + duración nominal. No usa elapsed ni stoppage time.

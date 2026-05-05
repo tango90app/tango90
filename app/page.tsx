@@ -7,7 +7,7 @@ import MatchStatusBadge from '@/components/MatchStatusBadge'
 import { getTeamByApiFootballId } from '@/data/teams'
 
 const PJS = "'Plus Jakarta Sans', sans-serif"
-const OBJ = "'Oswald', sans-serif"
+const OBJ = "'Plus Jakarta Sans', sans-serif"
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
@@ -74,7 +74,9 @@ export default async function Home() {
   .filter((row: any) => !apiMatchIds.has(row.internal_match_id))
   .map((row: any) => ({
     id: row.internal_match_id,
-    date: row.fixture_date,
+    date: new Date(row.kickoff_at).toLocaleDateString('sv-SE', {
+  timeZone: 'America/Argentina/Buenos_Aires'
+}),
     time: new Date(row.kickoff_at).toLocaleTimeString('es-AR', {
       hour: '2-digit',
       minute: '2-digit',
@@ -132,27 +134,55 @@ away: {
     <div style={{ background: '#0B0B0F', minHeight: '100vh' }}>
       {/* App header */}
       <header style={{
-        position: 'sticky', top: 0, zIndex: 100,
-        background: 'rgba(11,11,15,0.96)',
-        backdropFilter: 'blur(20px)',
-        borderBottom: '1px solid rgba(255,255,255,0.07)',
-        height: 56,
-        display: 'flex', alignItems: 'center',
-        padding: '0 16px', justifyContent: 'space-between',
-      }}>
-        <a href="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 8 }}>
-          <div style={{
-            width: 26, height: 26, borderRadius: '50%', background: '#6CCEFF',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
-          }}>
-            <span style={{ fontSize: 10, fontWeight: 800, color: '#0B0B0F', fontFamily: PJS, lineHeight: 1 }}>90</span>
-          </div>
-          <span style={{ fontSize: 17, fontWeight: 800, color: '#FFFFFF', fontFamily: PJS, letterSpacing: '-0.01em' }}>
-            TANGO<span style={{ color: '#6CCEFF' }}>90</span>
-          </span>
-        </a>
-        <span style={{ fontSize: 11, color: '#6B7280', fontFamily: PJS, fontWeight: 500 }}>calificá el fútbol</span>
-      </header>
+  position: 'sticky', top: 0, zIndex: 100,
+  background: 'rgba(11,11,15,0.96)',
+  backdropFilter: 'blur(20px)',
+  borderBottom: '1px solid rgba(255,255,255,0.07)',
+  height: 56,
+}}>
+  <div style={{
+    maxWidth: 480,
+    height: '100%',
+    margin: '0 auto',
+    padding: '0 16px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  }}>
+    <a href="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 10 }}>
+  <img
+    src="/logos/tango90/isotipo.svg"
+    alt="Tango90"
+    style={{ width: 32, height: 32, display: 'block' }}
+  />
+  <img
+    src="/logos/tango90/wordmark.svg"
+    alt="Tango90"
+    style={{ height: 22, width: 'auto', display: 'block' }}
+  />
+</a>
+        <button
+  aria-label="Abrir menú"
+  style={{
+    width: 32,
+    height: 32,
+    border: 'none',
+    background: 'transparent',
+    padding: 0,
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 5,
+    cursor: 'pointer',
+  }}
+>
+  <span style={{ width: 22, height: 2, background: '#9CA3AF', borderRadius: 2 }} />
+  <span style={{ width: 22, height: 2, background: '#9CA3AF', borderRadius: 2 }} />
+  <span style={{ width: 22, height: 2, background: '#9CA3AF', borderRadius: 2 }} />
+</button>
+        </div>
+</header>
 
       {/* Content */}
       <div style={{ maxWidth: 480, margin: '0 auto', padding: '0 16px', paddingBottom: 48 }}>
@@ -214,12 +244,12 @@ away: {
                     transition: 'border-color 0.15s, background 0.15s',
                   }}
                 >
-                  {/* Round indicator */}
-                  <div style={{ minWidth: 32, textAlign: 'center' }}>
-                    <div style={{ fontFamily: OBJ, fontSize: 11, color: '#6B7280', letterSpacing: '0.04em' }}>
-                      {match.status === 'upcoming' ? match.time : match.round.split(' ')[1] ? `F${match.round.split(' ')[1]}` : match.round}
-                    </div>
-                  </div>
+                  {/* Time / status */}
+<div style={{ minWidth: 42, textAlign: 'left', display: 'flex', alignItems: 'center' }}>
+  <div style={{ fontFamily: PJS, fontSize: 11, fontWeight: 600, color: '#6B7280', letterSpacing: '0.04em' }}>
+    {match.status === 'upcoming' ? match.time : 'FIN'}
+  </div>
+</div>
 
                   <div style={{
   flex: 1,
@@ -295,9 +325,7 @@ away: {
                         isFinished={true}
                       />
                     )}
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="2" strokeLinecap="round">
-                      <path d="m9 18 6-6-6-6" />
-                    </svg>
+                    
                   </div>
                 </div>
               </Link>

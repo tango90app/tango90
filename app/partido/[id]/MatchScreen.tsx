@@ -20,7 +20,7 @@ const C = {
   text:        '#FFFFFF',
   text2:       '#B0B3C0',
   text3:       '#6B6E7E',
-  accent:      '#FBD005',
+  accent:      '#BF9106',
   accentDim:   'rgba(108,206,255,0.10)',
   accentBorder:'rgba(108,206,255,0.25)',
 }
