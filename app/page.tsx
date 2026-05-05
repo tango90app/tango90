@@ -65,7 +65,10 @@ export default async function Home() {
     .eq('published', false)
     .order('kickoff_at', { ascending: true })
 
-  const trackedMatches: Match[] = (trackedRows ?? []).map((row: any) => ({
+    const apiMatchIds = new Set(apiMatches.map(m => m.id))
+    const trackedMatches: Match[] = (trackedRows ?? [])
+  .filter((row: any) => !apiMatchIds.has(row.internal_match_id))
+  .map((row: any) => ({
     id: row.internal_match_id,
     date: row.fixture_date,
     time: new Date(row.kickoff_at).toLocaleTimeString('es-AR', {
