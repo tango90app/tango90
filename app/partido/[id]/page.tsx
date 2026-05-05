@@ -3,6 +3,7 @@ import { matches } from '@/data/matches'
 import { processMatch } from '@/lib/processMatch'
 import { notFound } from 'next/navigation'
 import MatchScreen from './MatchScreen'
+import { getTeamByApiFootballId, getTeamByKey } from '@/data/teams'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
@@ -23,7 +24,29 @@ if (!match) {
 }
   if (!match) notFound()
 
-  const processed = processMatch(match)
+const normalizeTeam = (team: any) => {
+  const apiId = Number(String(team.id).replace('api-team-', ''))
+  const mapped =
+    Number.isFinite(apiId)
+      ? getTeamByApiFootballId(apiId)
+      : getTeamByKey(team.id)
 
-  return <MatchScreen match={match} processed={processed} />
+  return {
+    ...team,
+    id: mapped?.teamKey ?? team.id,
+    name: mapped?.displayName ?? team.name,
+    shortName: mapped?.abbreviation ?? team.shortName,
+    badge: mapped?.crestPath ?? team.badge,
+  }
+}
+
+const normalizedMatch = {
+  ...match,
+  home: normalizeTeam(match.home),
+  away: normalizeTeam(match.away),
+}
+
+const processed = processMatch(normalizedMatch)
+
+  return <MatchScreen match={normalizedMatch} processed={processed} />
 }

@@ -254,34 +254,39 @@ export default function MatchScreen({ match, processed }: Props) {
           padding: '0 16px',
           display: 'flex', alignItems: 'center',
         }}>
-          <Link href="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 8 }}>
-            <div style={{
-              width: compact ? 28 : 32, height: compact ? 28 : 32,
-              borderRadius: 8,
-              background: `linear-gradient(135deg, ${C.accent} 0%, #4EAEE0 100%)`,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              flexShrink: 0, transition: 'all 220ms ease',
-            }}>
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                <circle cx="8" cy="8" r="5.5" stroke="rgba(0,0,0,0.8)" strokeWidth="1.5"/>
-                <path d="M8 2.5L9.8 6.2H13.8L10.6 8.5L11.8 12.2L8 9.8L4.2 12.2L5.4 8.5L2.2 6.2H6.2Z" fill="rgba(0,0,0,0.85)" />
-              </svg>
-            </div>
-            <div style={{
-              display: 'flex',
-              flexDirection: compact ? 'row' : 'column',
-              alignItems: compact ? 'center' : 'flex-start',
-              gap: compact ? 0 : 0,
-              transition: 'all 220ms ease',
-            }}>
-              <span style={{ fontWeight: 800, fontSize: compact ? 15 : 13, letterSpacing: '0.08em', color: C.text, lineHeight: 1 }}>
-                TANGO
-              </span>
-              <span style={{ fontWeight: 800, fontSize: compact ? 15 : 13, letterSpacing: '0.08em', color: C.accent, lineHeight: 1 }}>
-                90
-              </span>
-            </div>
-          </Link>
+          <Link
+  href="/"
+  style={{
+    textDecoration: 'none',
+    display: 'flex',
+    alignItems: 'center',
+    gap: compact ? 10 : 0,
+    flexDirection: compact ? 'row' : 'column',
+    transition: 'all 220ms ease',
+  }}
+>
+  <img
+    src="/logos/tango90/isotipo.svg"
+    alt="Tango90"
+    style={{
+      width: compact ? 30 : 36,
+      height: compact ? 30 : 36,
+      display: 'block',
+      transition: 'all 220ms ease',
+    }}
+  />
+  <img
+    src="/logos/tango90/wordmark.svg"
+    alt="Tango90"
+    style={{
+      height: compact ? 18 : 16,
+      width: 'auto',
+      display: 'block',
+      marginTop: compact ? 0 : 6,
+      transition: 'all 220ms ease',
+    }}
+  />
+</Link>
           <div style={{ flex: 1 }} />
           <button style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4, display: 'flex', flexDirection: 'column', gap: 4 }}>
             {[0,1,2].map(i => <div key={i} style={{ width: 20, height: 2, background: C.text2, borderRadius: 1 }} />)}
@@ -430,8 +435,7 @@ function MatchHeader({ match, processed }: { match: Match; processed: ProcessedM
 
         <div style={{ display: 'flex', alignItems: 'center' }}>
           <div style={{ flex: 1, textAlign: 'right', paddingRight: 12 }}>
-            <div style={{ fontSize: 15, fontWeight: 700, color: C.text }}>{match.home.name}</div>
-            <div style={{ fontSize: 10, color: C.text3, marginTop: 2 }}>LOCAL</div>
+            <div style={{ fontSize: 15, fontWeight: 700, color: C.text }}>{(match.home as any).displayName || match.home.name}</div>
           </div>
 
           <div style={{ textAlign: 'center', minWidth: 116 }}>
@@ -473,8 +477,7 @@ function MatchHeader({ match, processed }: { match: Match; processed: ProcessedM
           </div>
 
           <div style={{ flex: 1, paddingLeft: 12 }}>
-            <div style={{ fontSize: 15, fontWeight: 700, color: C.text }}>{match.away.name}</div>
-            <div style={{ fontSize: 10, color: C.text3, marginTop: 2 }}>VISITANTE</div>
+            <div style={{ fontSize: 15, fontWeight: 700, color: C.text }}>{(match.away as any).displayName || match.away.name}</div>
           </div>
         </div>
 
@@ -537,10 +540,23 @@ function TeamTab({ team, isActive, teamAvg, onClick }: {
         title={team.name}
         aria-label={`${team.name} badge`}
       >
-        {team.badge}
-      </span>
-      <span style={{ fontSize: 13, fontWeight: 700, color: isActive ? C.text : C.text2, transition: 'color 180ms ease' }}>
-        {team.shortName}
+        {String(team.badge).startsWith('/') ? (
+  <img
+    src={team.badge}
+    alt=""
+    style={{
+      width: isActive ? 28 : 20,
+      height: isActive ? 28 : 20,
+      objectFit: 'contain',
+      display: 'block',
+      opacity: isActive ? 1 : 0.5,
+      filter: isActive ? 'none' : 'grayscale(100%)',
+      transition: 'all 180ms ease',
+    }}
+  />
+) : (
+  team.badge
+)}
       </span>
       {teamAvg !== null && (
         <span style={{ fontSize: 11, fontWeight: 700, color: '#fff', background: ratingBg(teamAvg), padding: '1px 7px', borderRadius: 6 }}>
