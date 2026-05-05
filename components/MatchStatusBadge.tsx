@@ -7,13 +7,18 @@ type Props = {
   entityIds: string[]
   // Si el partido no es 'finished', no renderiza nada
   isFinished: boolean
+  // Fecha/hora real de finalización del partido
+  matchEndAt?: string
 }
 
 type VoteState = 'none' | 'partial' | 'complete'
 
-export default function MatchStatusBadge({ entityIds, isFinished }: Props) {
+export default function MatchStatusBadge({ entityIds, isFinished, matchEndAt }: Props) {
   const [state, setState] = useState<VoteState>('none')
   const [mounted, setMounted] = useState(false)
+  const votingClosed = matchEndAt
+  ? Date.now() > new Date(matchEndAt).getTime() + 24 * 60 * 60 * 1000
+  : false
 
   useEffect(() => {
     setMounted(true)
@@ -85,7 +90,30 @@ export default function MatchStatusBadge({ entityIds, isFinished }: Props) {
     )
   }
 
-  return <DefaultBadge />
+  if (votingClosed) {
+  return (
+    <span style={{
+      fontFamily: 'Oswald, sans-serif',
+      fontSize: 10,
+      fontWeight: 700,
+      borderRadius: 3,
+      letterSpacing: '0.07em',
+
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      minWidth: 64,
+      height: 22,
+
+      background: '#1a1a1a',
+      color: '#6B7280',
+    }}>
+      FINALIZADO
+    </span>
+  )
+}
+
+return <DefaultBadge />
 }
 
 function DefaultBadge() {

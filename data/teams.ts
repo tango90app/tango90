@@ -39,12 +39,12 @@ export const TEAMS: TangoTeam[] = [
     apiFootballId: 436,
     officialName: 'Racing Club',
     displayName: 'Racing',
-    abbreviation: 'RAC',
+    abbreviation: 'RC',
     crestPath: '/logos/teams/racing.svg',
     primaryColor: '#75AADB',
     secondaryColor: '#FFFFFF',
   },
-    {
+  {
     teamKey: 'independiente',
     apiFootballId: 453,
     officialName: 'Club Atlético Independiente',
@@ -84,7 +84,7 @@ export const TEAMS: TangoTeam[] = [
     primaryColor: '#E11D48',
     secondaryColor: '#FFFFFF',
   },
-    {
+  {
     teamKey: 'rosario-central',
     apiFootballId: 437,
     officialName: 'Club Atlético Rosario Central',
@@ -134,7 +134,7 @@ export const TEAMS: TangoTeam[] = [
     primaryColor: '#FFFFFF',
     secondaryColor: '#1E3A8A',
   },
-    {
+  {
     teamKey: 'talleres',
     apiFootballId: 456,
     officialName: 'Club Atlético Talleres',
@@ -184,7 +184,7 @@ export const TEAMS: TangoTeam[] = [
     primaryColor: '#C8FF00',
     secondaryColor: '#006400',
   },
-    {
+  {
     teamKey: 'newells',
     apiFootballId: 457,
     officialName: "Newell's Old Boys",
@@ -234,7 +234,7 @@ export const TEAMS: TangoTeam[] = [
     primaryColor: '#FF0000',
     secondaryColor: '#FFFFFF',
   },
-    {
+  {
     teamKey: 'tigre',
     apiFootballId: 452,
     officialName: 'Club Atlético Tigre',
@@ -289,7 +289,7 @@ export const TEAMS: TangoTeam[] = [
     apiFootballId: 1066,
     officialName: 'Gimnasia y Esgrima de Mendoza',
     displayName: 'Gimnasia de Mendoza',
-    abbreviation: 'GYEM',
+    abbreviation: 'GYE',
     crestPath: '/logos/teams/gimnasia_mendoza.svg',
     primaryColor: '#FFFFFF',
     secondaryColor: '#1E3A8A',
@@ -299,7 +299,7 @@ export const TEAMS: TangoTeam[] = [
     apiFootballId: 2424,
     officialName: 'Asociación Atlética Estudiantes de Río Cuarto',
     displayName: 'Estudiantes de Río Cuarto',
-    abbreviation: 'AAERC',
+    abbreviation: 'AAE',
     crestPath: '/logos/teams/estudiantes_rc.svg',
     primaryColor: '#1E3A8A',
     secondaryColor: '#FFFFFF',

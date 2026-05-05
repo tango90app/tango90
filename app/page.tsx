@@ -32,6 +32,30 @@ function formatDate(dateStr: string) {
   return d.toLocaleDateString('es-AR', { weekday: 'short', day: 'numeric', month: 'short' }).toUpperCase()
 }
 
+function getMatchTimeLabel(match: Match) {
+  if (match.status === 'upcoming') {
+    return match.time
+  }
+
+  if (match.status === 'live') {
+    return 'VIVO'
+  }
+
+  if (match.status === 'finished') {
+    if (!match.match_end_at) return 'FIN'
+
+    const end = new Date(match.match_end_at).getTime()
+    const now = Date.now()
+
+    const diffMs = end + (24 * 60 * 60 * 1000) - now
+    const diffHours = Math.floor(diffMs / (1000 * 60 * 60))
+
+    if (diffHours <= 0) return 'FIN'
+    return `${diffHours}H`
+  }
+
+  return ''
+}
 export default async function Home() {
   noStore()
 
@@ -247,7 +271,7 @@ away: {
                   {/* Time / status */}
 <div style={{ minWidth: 42, textAlign: 'left', display: 'flex', alignItems: 'center' }}>
   <div style={{ fontFamily: PJS, fontSize: 11, fontWeight: 600, color: '#6B7280', letterSpacing: '0.04em' }}>
-    {match.status === 'upcoming' ? match.time : 'FIN'}
+    {getMatchTimeLabel(match)}
   </div>
 </div>
 
@@ -321,9 +345,10 @@ away: {
                     {match.status === 'upcoming' && <UpcomingBadge />}
                     {match.status === 'finished' && (
                       <MatchStatusBadge
-                        entityIds={getVotableEntityIds(processMatch(match))}
-                        isFinished={true}
-                      />
+  entityIds={getVotableEntityIds(processMatch(match))}
+  isFinished={true}
+  matchEndAt={match.match_end_at}
+/>
                     )}
                     
                   </div>
