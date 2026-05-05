@@ -113,7 +113,7 @@ away: {
     events: [],
   }))
 
-  const allMatches: Match[] = [...trackedMatches, ...apiMatches, ...matches]
+  const allMatches: Match[] = [...trackedMatches, ...apiMatches]
 
   const byDate: Record<string, Match[]> = {}
   for (const m of allMatches) {
