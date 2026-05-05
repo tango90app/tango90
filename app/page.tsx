@@ -1,3 +1,4 @@
+import { unstable_noStore as noStore } from 'next/cache'
 import Link from 'next/link'
 import { matches, type Match } from '@/data/matches'
 import { supabaseServer } from '@/lib/supabaseServer'
@@ -8,6 +9,7 @@ import { getTeamByApiFootballId } from '@/data/teams'
 const PJS = "'Plus Jakarta Sans', sans-serif"
 const OBJ = "'Oswald', sans-serif"
 export const dynamic = 'force-dynamic'
+export const revalidate = 0
 
 function LiveBadge() {
   return (
@@ -31,6 +33,8 @@ function formatDate(dateStr: string) {
 }
 
 export default async function Home() {
+  noStore()
+
   const { data: apiRows, error } = await supabaseServer
     .from('matches_api')
     .select('data')
