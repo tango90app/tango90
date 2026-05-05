@@ -119,6 +119,7 @@ away: {
 
   const allMatches: Match[] = [...trackedMatches, ...apiMatches]
 
+
   const byDate: Record<string, Match[]> = {}
   for (const m of allMatches) {
     if (!m || !m.date) continue
@@ -156,11 +157,35 @@ away: {
       {/* Content */}
       <div style={{ maxWidth: 480, margin: '0 auto', padding: '0 16px', paddingBottom: 48 }}>
         {/* Section label */}
-        <div style={{ padding: '20px 0 14px', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
-          <h1 style={{ fontFamily: OBJ, fontSize: 12, fontWeight: 600, color: '#6B7280', letterSpacing: '0.14em', margin: 0 }}>
-            LIGA PROFESIONAL · FECHA 10
-          </h1>
-        </div>
+<div style={{ padding: '20px 0 14px', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
+  <div style={{
+    display: 'flex',
+    alignItems: 'center',
+    gap: 8,
+    fontFamily: OBJ,
+    fontSize: 12,
+    fontWeight: 600,
+    color: '#6B7280',
+    letterSpacing: '0.14em',
+  }}>
+    <img src="/logos/competitions/afa.svg" alt="" style={{ width: 36, height: 36, objectFit: 'contain' }} />
+      <img src="/logos/competitions/lpf.svg" alt="" style={{ width: 36, height: 36, objectFit: 'contain' }} />
+    <span>LIGA PROFESIONAL DE FÚTBOL</span>
+  </div>
+
+  <div style={{
+    marginTop: 12,
+    display: 'grid',
+    gridTemplateColumns: '32px 1fr 32px',
+    alignItems: 'center',
+  }}>
+    <span style={{ fontFamily: PJS, color: '#6B7280', fontSize: 18, textAlign: 'left' }}>‹</span>
+    <div style={{ fontFamily: OBJ, fontSize: 18, fontWeight: 600, color: '#FFFFFF', letterSpacing: '0.08em', textAlign: 'center' }}>
+      {(allMatches[0]?.round ?? '').toUpperCase()}
+    </div>
+    <span style={{ fontFamily: PJS, color: '#6B7280', fontSize: 18, textAlign: 'right' }}>›</span>
+  </div>
+</div>
 
         {/* Match list */}
         {dates.map(date => (
