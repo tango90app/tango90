@@ -40,26 +40,48 @@ export default function MatchStatusBadge({ entityIds, isFinished }: Props) {
   if (state === 'complete') {
     return (
       <span style={{
-        fontFamily: 'Oswald, sans-serif', fontSize: 10, fontWeight: 700,
-        padding: '2px 7px', borderRadius: 3, letterSpacing: '0.07em',
-        background: 'rgba(34,197,94,0.12)', color: '#22c55e',
-        border: '1px solid rgba(34,197,94,0.3)',
-      }}>
-        VER CALIFICACIÓN
-      </span>
+  fontFamily: 'Oswald, sans-serif',
+  fontSize: 10,
+  fontWeight: 700,
+  borderRadius: 3,
+  letterSpacing: '0.07em',
+
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  minWidth: 64,
+  height: 22,
+
+  background: 'rgba(34,197,94,0.12)',
+  color: '#22c55e',
+  border: '1px solid rgba(34,197,94,0.3)',
+}}>
+  RESULTADOS
+</span>
     )
   }
 
   if (state === 'partial') {
     return (
       <span style={{
-        fontFamily: 'Oswald, sans-serif', fontSize: 10, fontWeight: 700,
-        padding: '2px 7px', borderRadius: 3, letterSpacing: '0.07em',
-        background: 'rgba(245,166,35,0.12)', color: '#F5A623',
-        border: '1px solid rgba(245,166,35,0.3)',
-      }}>
-        EN PROCESO
-      </span>
+  fontFamily: 'Oswald, sans-serif',
+  fontSize: 10,
+  fontWeight: 700,
+  borderRadius: 3,
+  letterSpacing: '0.07em',
+
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  minWidth: 64,
+  height: 22,
+
+  background: 'rgba(245,166,35,0.12)',
+  color: '#F5A623',
+  border: '1px solid rgba(245,166,35,0.3)',
+}}>
+  EN CURSO
+</span>
     )
   }
 
@@ -69,9 +91,20 @@ export default function MatchStatusBadge({ entityIds, isFinished }: Props) {
 function DefaultBadge() {
   return (
     <span style={{
-      fontFamily: 'Oswald, sans-serif', fontSize: 10, fontWeight: 700,
-      padding: '2px 7px', borderRadius: 3, letterSpacing: '0.07em',
-      background: '#1a1a1a', color: '#F5A623',
+      fontFamily: 'Oswald, sans-serif',
+      fontSize: 10,
+      fontWeight: 700,
+      borderRadius: 3,
+      letterSpacing: '0.07em',
+
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      minWidth: 64,
+      height: 22,
+
+      background: '#1a1a1a',
+      color: '#F5A623',
     }}>
       CALIFICÁ
     </span>
