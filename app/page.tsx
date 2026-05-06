@@ -71,13 +71,11 @@ function getCompetitionKey(match: Match): CompetitionKey {
   return 'lpf'
 }
 function formatVoteCount(count: number) {
-  if (count <= 0) return null
-  if (count < 10) return `+${count} voto${count === 1 ? '' : 's'}`
+  if (count < 10) return null
   if (count < 25) return '+10 votos'
   if (count < 50) return '+25 votos'
   if (count < 100) return '+50 votos'
   if (count < 200) return '+100 votos'
-  if (count < 250) return '+200 votos'
   if (count < 500) return '+250 votos'
   if (count < 1000) return '+500 votos'
   if (count < 2500) return '+1k votos'
@@ -101,14 +99,33 @@ function getMatchTimeLabel(match: Match) {
     const now = Date.now()
 
     const diffMs = end + (24 * 60 * 60 * 1000) - now
-    const diffHours = Math.floor(diffMs / (1000 * 60 * 60))
+    const diffMinutes = Math.floor(diffMs / (1000 * 60))
+const diffHours = Math.floor(diffMinutes / 60)
 
-    if (diffHours <= 0) return 'FIN'
-    return `${diffHours}H`
+if (diffMinutes <= 0) return 'FIN'
+if (diffMinutes < 60) return `${diffMinutes}M`
+
+return `${diffHours}H`
   }
 
   return ''
 }
+
+function getCountdownColor(match: Match) {
+  if (match.status !== 'finished' || !match.match_end_at) return '#6B7280'
+
+  const end = new Date(match.match_end_at).getTime()
+  const now = Date.now()
+  const diffMs = end + (24 * 60 * 60 * 1000) - now
+  const diffHours = diffMs / (1000 * 60 * 60)
+
+  if (diffHours <= 0) return '#6B7280'
+  if (diffHours <= 0.5) return '#FFFFFF'
+  if (diffHours <= 2) return '#F2F2F2'
+  if (diffHours <= 6) return '#9CA3AF'
+  return '#6B7280'
+}
+
 type HomeProps = {
   searchParams?: {
     competition?: string
@@ -415,7 +432,13 @@ const filteredMatches = allMatches.filter(match =>
                 >
                   {/* Time / status */}
 <div style={{ minWidth: 42, textAlign: 'left', display: 'flex', alignItems: 'center' }}>
-  <div style={{ fontFamily: PJS, fontSize: 11, fontWeight: 600, color: '#6B7280', letterSpacing: '0.04em' }}>
+  <div style={{
+    fontFamily: getMatchTimeLabel(match).includes('H') ? OBJ : PJS,
+    fontSize: getMatchTimeLabel(match).includes('H') ? 15 : 11,
+    fontWeight: getMatchTimeLabel(match).includes('H') ? 700 : 600,
+    color: getMatchTimeLabel(match).includes('H') ? getCountdownColor(match) : '#6B7280',
+    letterSpacing: getMatchTimeLabel(match).includes('H') ? '0.02em' : '0.04em',
+  }}>
     {getMatchTimeLabel(match)}
   </div>
 </div>
