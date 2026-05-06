@@ -121,7 +121,9 @@ if (!match) {
   // ── Progreso + Placas ─────────────────────────────────────────────────
   // El voto ya está guardado. Si falla el cálculo, devolvemos ok igualmente.
   try {
-    const sections = getVotableSections(match_id)
+    const match = matches.find(m => m.id === match_id)
+
+const sections = match ? getVotableSections(match) : null
     if (!sections) {
       return NextResponse.json({ ok: true, progress: null, newPlaques: [] }, { status: 201 })
     }
