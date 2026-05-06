@@ -80,9 +80,9 @@ export default function MatchStatusBadge({ entityIds, isFinished, matchEndAt }: 
         minWidth: 64,
         height: 22,
 
-        background: 'rgba(34,197,94,0.12)',
-        color: '#22c55e',
-        border: '1px solid rgba(34,197,94,0.3)',
+        background: '#2F3327',
+        color: '#9acd32',
+        border: '1px solid #5A6641',
       }}>
         RESULTADOS
       </span>
