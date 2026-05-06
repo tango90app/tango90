@@ -70,6 +70,21 @@ function getCompetitionKey(match: Match): CompetitionKey {
 
   return 'lpf'
 }
+function formatVoteCount(count: number) {
+  if (count <= 0) return null
+  if (count < 10) return `+${count} voto${count === 1 ? '' : 's'}`
+  if (count < 25) return '+10 votos'
+  if (count < 50) return '+25 votos'
+  if (count < 100) return '+50 votos'
+  if (count < 200) return '+100 votos'
+  if (count < 250) return '+200 votos'
+  if (count < 500) return '+250 votos'
+  if (count < 1000) return '+500 votos'
+  if (count < 2500) return '+1k votos'
+  if (count < 5000) return '+2.5k votos'
+  if (count < 10000) return '+5k votos'
+  return '+10k votos'
+}
 function getMatchTimeLabel(match: Match) {
   if (match.status === 'upcoming') {
     return match.time
@@ -191,6 +206,20 @@ away: {
   }))
 
   const allMatches: Match[] = [...trackedMatches, ...apiMatches]
+
+  const matchIds = allMatches.map(m => m.id)
+
+const { data: voteRows } = await supabaseServer
+  .from('votes')
+  .select('match_id')
+  .in('match_id', matchIds)
+
+const voteCountsByMatchId: Record<string, number> = {}
+
+for (const row of voteRows ?? []) {
+  const matchId = row.match_id as string
+  voteCountsByMatchId[matchId] = (voteCountsByMatchId[matchId] ?? 0) + 1
+}
 
   const activeCompetitionKey = (
   searchParams?.competition &&
@@ -460,12 +489,34 @@ const filteredMatches = allMatches.filter(match =>
                     {match.status === 'live' && <LiveBadge />}
                     {match.status === 'upcoming' && <UpcomingBadge />}
                     {match.status === 'finished' && (
-                      <MatchStatusBadge
-  entityIds={getVotableEntityIds(processMatch(match))}
-  isFinished={true}
-  matchEndAt={match.match_end_at}
-/>
-                    )}
+  <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+    <MatchStatusBadge
+      entityIds={getVotableEntityIds(processMatch(match))}
+      isFinished={true}
+      matchEndAt={match.match_end_at}
+    />
+
+    {formatVoteCount(voteCountsByMatchId[match.id] ?? 0) && (
+      <span style={{
+        position: 'absolute',
+        top: '100%',
+        marginTop: 2,
+        left: '50%',
+        transform: 'translateX(-50%)',
+        fontFamily: PJS,
+        fontSize: 9,
+        fontWeight: 500,
+        color: '#F2F2F2',
+        letterSpacing: '0.04em',
+        whiteSpace: 'nowrap',
+        textAlign: 'center',
+        pointerEvents: 'none',
+      }}>
+        {formatVoteCount(voteCountsByMatchId[match.id] ?? 0)}
+      </span>
+    )}
+  </div>
+)}
                     
                   </div>
                 </div>
