@@ -46,7 +46,7 @@ function ratingBg(score: number): string {
   if (score < 8.0) return '#16A34A'
   return '#15803D'
 }
-function ratingLabel(score: number): string { return score.toFixed(1) }
+function ratingLabel(score: number): string { return score.toFixed(2) }
 
 // ── Storage helpers — same keys as existing system, do NOT change ─────────
 function readVote(entityId: string): number | null {
@@ -661,7 +661,16 @@ function PitchSection({ players, matchId, isHome, avgsMap, phase, onOpen }: {
         const xs = chipXPositions(linePlayers.length)
         const y  = lineY[line]
         return linePlayers.map((p, i) => (
-          <PlayerChip key={p.id} player={p} matchId={matchId} cx={xs[i]} cy={y} avgData={avgsMap[p.id]} phase={phase} onOpen={onOpen} />
+          <PlayerChip
+  key={p.id}
+  player={p}
+  matchId={matchId}
+  cx={xs[i]}
+  cy={y}
+  avgData={avgsMap[p.id]}
+  phase={phase}
+  onOpen={onOpen}
+/>
         ))
       })}
     </div>
@@ -688,7 +697,7 @@ function PlayerChip({ player, matchId, cx, cy, avgData, phase, onOpen }: {
   const myVote       = avgData?.myVote ?? localVote
   // Si el servidor aún no devolvió avg pero el usuario ya votó,
   // usamos myVote como fallback (avg de 1 solo voto = ese voto).
-  const serverAvg    = avgData?.avg ?? (myVote !== null ? myVote : null)
+  const serverAvg = avgData?.avg ?? null
   const displayScore = getDisplayScore(phase, myVote, serverAvg)
   const hasVoted     = myVote !== null
   const wasSubbedOut = player.status === 'starter_subbed_out' || player.status === 'sub_entered_subbed_out'
@@ -781,7 +790,7 @@ function PlayerChip({ player, matchId, cx, cy, avgData, phase, onOpen }: {
     lineHeight: 1,
   }}>
     {typeof window !== 'undefined' && myVote !== null
-      ? ratingLabel(myVote)
+      ? String(myVote)
       : (player.eligibleForVoting ? '–' : '')
     }
   </span>
@@ -966,6 +975,16 @@ function RowScoreDisplay({ myVote, serverAvg: rawServerAvg, phase, eligible, cta
   eligible:  boolean
   cta?:      boolean
 }) {
+    const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  if (!mounted) {
+    return <div style={{ width: 36, height: 36, flexShrink: 0 }} />
+  }
+
   // Si el servidor aún no devolvió avg pero el usuario ya votó,
   // usamos myVote como fallback (avg de 1 solo voto = ese voto).
   const serverAvg = rawServerAvg ?? (myVote !== null ? myVote : null)
@@ -977,7 +996,7 @@ function RowScoreDisplay({ myVote, serverAvg: rawServerAvg, phase, eligible, cta
   const hasVoted = myVote !== null
 
   if (!hasVoted && !showAvg) {
-    if (!eligible) return null
+        if (!eligible) return <div style={{ width: 36, height: 36, flexShrink: 0 }} />
     return (
       <div style={{ width: 36, height: 36, borderRadius: 10, border: `1px solid ${cta ? C.accent : C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
         <span style={{ fontSize: 9, color: C.accent, fontWeight: 700 }}>VOTÁ</span>
@@ -989,7 +1008,7 @@ function RowScoreDisplay({ myVote, serverAvg: rawServerAvg, phase, eligible, cta
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, flexShrink: 0 }}>
       {hasVoted ? (
         <div style={{ minWidth: 36, height: 28, borderRadius: 8, background: ratingBg(myVote!), display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 6px' }}>
-          <span style={{ fontSize: 13, fontWeight: 800, color: '#fff', lineHeight: 1 }}>{ratingLabel(myVote!)}</span>
+          <span style={{ fontSize: 13, fontWeight: 800, color: '#fff', lineHeight: 1 }}>{String(myVote!)}</span>
         </div>
       ) : showAvg ? (
         <div style={{ minWidth: 36, height: 28, borderRadius: 8, background: C.s2, border: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 6px' }}>

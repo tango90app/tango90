@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseServer } from '@/lib/supabaseServer'
 import { getVotableSections, computeProgress } from '@/lib/voteProgress'
-import { matches } from '@/data/matches'
+import { matches, type Match } from '@/data/matches'
 import { processMatch } from '@/lib/processMatch'
 import { computeTeamAverage } from '@/lib/teamAverage'
 
@@ -48,7 +48,30 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'match_id and anon_id are required' }, { status: 400 })
   }
 
-  const sections = getVotableSections(match_id)
+    // ── Resolver partido real ────────────────────────────────────────────
+  let match: Match | null = null
+
+  const { data: apiMatchRow } = await supabaseServer
+    .from('matches_api')
+    .select('data')
+    .eq('id', match_id)
+    .maybeSingle()
+
+  if (apiMatchRow?.data) {
+    match = apiMatchRow.data as Match
+  } else {
+    match = matches.find(m => m.id === match_id) ?? null
+  }
+
+  if (!match) {
+    return NextResponse.json<MatchAveragesResponse>(
+      { byTarget: {}, homeTeamAvg: null, awayTeamAvg: null },
+      { headers: NO_CACHE }
+    )
+  }
+
+  const sections = getVotableSections(match)
+
   if (!sections) {
     return NextResponse.json<MatchAveragesResponse>(
       { byTarget: {}, homeTeamAvg: null, awayTeamAvg: null },
@@ -95,7 +118,7 @@ export async function GET(req: NextRequest) {
   const votedIds   = rows.filter(r => r.anon_id === anon_id).map(r => r.target_id as string)
   const progress   = computeProgress(sections, votedIds)
 
-  const match = matches.find(m => m.id === match_id)!
+  
   const processed = processMatch(match)
 
   // Construir mapa id → avg para jugadores

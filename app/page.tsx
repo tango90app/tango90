@@ -155,7 +155,7 @@ away: normalizeTeam(m.away),
       timeZone: 'America/Argentina/Buenos_Aires',
     }),
     tournament: row.league_name ?? 'Liga Profesional Argentina',
-    round: 'Próximo',
+    round: row.round ?? 'Próximo',
     stadium: '',
     status: 'upcoming',
     home: {

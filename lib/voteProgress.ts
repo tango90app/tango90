@@ -6,7 +6,7 @@
 // Importar SOLO desde código server-side (API routes).
 // No marcar con 'use client'.
 
-import { matches } from '@/data/matches'
+import type { Match } from '@/data/matches'
 import { processMatch } from './processMatch'
 
 // ── Secciones votables ────────────────────────────────────────────────────
@@ -34,8 +34,7 @@ export type VotableSections = {
  * Retorna null si el partido no existe o no está terminado.
  * Usa processMatch como única fuente de verdad para elegibilidad.
  */
-export function getVotableSections(matchId: string): VotableSections | null {
-  const match = matches.find(m => m.id === matchId)
+export function getVotableSections(match: Match): VotableSections | null {
   if (!match || match.status !== 'finished') return null
 
   const processed = processMatch(match)

@@ -42,6 +42,52 @@ export default function MatchStatusBadge({ entityIds, isFinished, matchEndAt }: 
     return isFinished ? <DefaultBadge /> : null
   }
 
+    if (votingClosed) {
+    if (state === 'none') {
+      return (
+        <span style={{
+          fontFamily: 'Oswald, sans-serif',
+          fontSize: 10,
+          fontWeight: 700,
+          borderRadius: 3,
+          letterSpacing: '0.07em',
+
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          minWidth: 64,
+          height: 22,
+
+          background: '#1a1a1a',
+          color: '#6B7280',
+        }}>
+          FINALIZADO
+        </span>
+      )
+    }
+
+    return (
+      <span style={{
+        fontFamily: 'Oswald, sans-serif',
+        fontSize: 10,
+        fontWeight: 700,
+        borderRadius: 3,
+        letterSpacing: '0.07em',
+
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        minWidth: 64,
+        height: 22,
+
+        background: 'rgba(34,197,94,0.12)',
+        color: '#22c55e',
+        border: '1px solid rgba(34,197,94,0.3)',
+      }}>
+        RESULTADOS
+      </span>
+    )
+  }
   if (state === 'complete') {
     return (
       <span style={{
@@ -90,28 +136,7 @@ export default function MatchStatusBadge({ entityIds, isFinished, matchEndAt }: 
     )
   }
 
-  if (votingClosed) {
-  return (
-    <span style={{
-      fontFamily: 'Oswald, sans-serif',
-      fontSize: 10,
-      fontWeight: 700,
-      borderRadius: 3,
-      letterSpacing: '0.07em',
-
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      minWidth: 64,
-      height: 22,
-
-      background: '#1a1a1a',
-      color: '#6B7280',
-    }}>
-      FINALIZADO
-    </span>
-  )
-}
+  
 
 return <DefaultBadge />
 }

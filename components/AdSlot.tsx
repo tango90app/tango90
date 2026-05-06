@@ -3,7 +3,11 @@ type AdSlotProps = {
   label?: string
 }
 
+const SHOW_AD_SLOTS = false
+
 export default function AdSlot({ type = 'banner', label = 'PUBLICIDAD' }: AdSlotProps) {
+    if (!SHOW_AD_SLOTS) return null
+    
   const isLarge = type === 'large'
 
   return (

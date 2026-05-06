@@ -36,11 +36,19 @@ export async function POST(req: NextRequest) {
   const row = data as RawFixtureRow
 
   // 2. transformar
-  let match
+    let match
   try {
     match = buildMatchFromRaw(row)
   } catch (e) {
-    return NextResponse.json({ error: 'Error transformando match' }, { status: 422 })
+    const message = e instanceof Error ? e.message : String(e)
+
+    return NextResponse.json(
+      {
+        error: 'Error transformando match',
+        detail: message,
+      },
+      { status: 422 }
+    )
   }
 
   // 3. guardar en matches_api
