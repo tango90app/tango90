@@ -61,7 +61,7 @@ export default function MatchStatusBadge({ entityIds, isFinished, matchEndAt }: 
           background: '#1a1a1a',
           color: '#6B7280',
         }}>
-          FINALIZADO
+          RESULTADOS
         </span>
       )
     }

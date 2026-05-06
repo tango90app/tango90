@@ -989,7 +989,8 @@ function RowScoreDisplay({ myVote, serverAvg: rawServerAvg, phase, eligible, cta
   // usamos myVote como fallback (avg de 1 solo voto = ese voto).
   const serverAvg = rawServerAvg ?? (myVote !== null ? myVote : null)
   // En modo ciego: avg visible solo si el usuario ya votó esa entidad
-  const showAvg = phase === 'voting_open_blind'
+  const showAvg =
+  phase === 'voting_open_blind'
     ? myVote !== null && serverAvg !== null
     : serverAvg !== null
 
@@ -1016,7 +1017,7 @@ function RowScoreDisplay({ myVote, serverAvg: rawServerAvg, phase, eligible, cta
         </div>
       ) : null}
       {/* Promedio secundario — solo si el usuario votó y hay avg */}
-      {hasVoted && showAvg && (
+      {showAvg && (
         <span style={{ fontSize: 10, fontWeight: 600, color: 'rgba(255,255,255,0.5)', lineHeight: 1 }}>
           ∅ {ratingLabel(serverAvg!)}
         </span>
