@@ -16,7 +16,7 @@ export async function GET(req: NextRequest) {
   const { error: tableError } = await supabaseServer.from('plaques').select('id').limit(1)
   const tableExists = !tableError
 
-  const sections = getVotableSections(match_id)
+  // const sections = getVotableSections(match_id)
 
   const { data: votes } = await supabaseServer
     .from('votes').select('target_id, target_type')
