@@ -127,9 +127,9 @@ export default function MatchStatusBadge({ entityIds, isFinished, matchEndAt }: 
   minWidth: 64,
   height: 22,
 
-  background: 'rgba(245,166,35,0.12)',
-  color: '#F5A623',
-  border: '1px solid rgba(245,166,35,0.3)',
+  background: '#594403',
+  color: '#F2B807',
+  border: '1px solid #A67E05',
 }}>
   EN CURSO
 </span>
@@ -157,7 +157,7 @@ function DefaultBadge() {
       height: 22,
 
       background: '#1a1a1a',
-      color: '#F5A623',
+      color: '#FBD005',
     }}>
       CALIFICÁ
     </span>
