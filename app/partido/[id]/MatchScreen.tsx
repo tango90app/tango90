@@ -677,12 +677,48 @@ primaryColor?: string; secondaryColor?: string
     // The chips are positioned absolutely; we must NOT use overflow:hidden here
     <div style={{ position: 'relative', width: PITCH_W, height: PITCH_H, margin: '0 auto' }}>
 
-      {/* Pitch background with rounded corners via border-radius */}
-      <div style={{
-        position: 'absolute', inset: 0, borderRadius: 20,
-        background: 'repeating-linear-gradient(to bottom,#0D2B14 0px,#0D2B14 71px,#0C2A13 71px,#0C2A13 142px)',
-        overflow: 'hidden',
-      }} />
+      {/* Pitch background with subtle premium atmosphere */}
+<div style={{
+  position: 'absolute',
+  inset: 0,
+  borderRadius: 20,
+  overflow: 'hidden',
+  background: `
+    radial-gradient(circle at 50% 48%,
+      rgba(255,255,255,0.045) 0%,
+      rgba(255,255,255,0.018) 28%,
+      rgba(0,0,0,0.00) 55%
+    ),
+    radial-gradient(circle at 50% 50%,
+      rgba(0,0,0,0.00) 0%,
+      rgba(0,0,0,0.10) 72%,
+      rgba(0,0,0,0.22) 100%
+    ),
+    repeating-linear-gradient(
+      to bottom,
+      #0D2B14 0px,
+      #0D2B14 71px,
+      #0D2A14 71px,
+      #0D2A14 142px
+    )
+  `,
+}} />
+
+{/* Ultra subtle organic grain */}
+<div style={{
+  position: 'absolute',
+  inset: 0,
+  borderRadius: 20,
+  pointerEvents: 'none',
+  opacity: 0.035,
+  mixBlendMode: 'soft-light',
+  backgroundImage: `
+    radial-gradient(circle at 20% 30%, rgba(255,255,255,0.22) 0 1px, transparent 1px),
+    radial-gradient(circle at 70% 60%, rgba(255,255,255,0.18) 0 1px, transparent 1px),
+    radial-gradient(circle at 45% 80%, rgba(0,0,0,0.18) 0 1px, transparent 1px)
+  `,
+  backgroundSize: '18px 18px, 22px 22px, 26px 26px',
+}} />
 
       {/* Vignette */}
       <div style={{
