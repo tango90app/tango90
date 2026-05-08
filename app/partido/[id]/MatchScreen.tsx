@@ -116,7 +116,15 @@ function formatPlayerShortName(fullName: string): string {
 
 function formatCompetitionName(name: string) {
   if (name === 'Liga Profesional Argentina') {
-    return 'LIGA PROFESIONAL DE FÚTBOL'
+    return 'LPF'
+  }
+
+  return name.toUpperCase()
+}
+
+function formatCompetitionShortName(name: string) {
+  if (name === 'Liga Profesional Argentina') {
+    return 'LPF'
   }
 
   return name.toUpperCase()
@@ -508,13 +516,17 @@ function MatchHeader({ match, processed }: { match: Match; processed: ProcessedM
       <div style={{ maxWidth: MAX_W, margin: '0 auto', padding: '14px 16px 12px' }}>
 
         <div style={{ textAlign: 'center', marginBottom: 14 }}>
-          <p style={{ margin: 0, fontSize: 10, fontWeight: 700, letterSpacing: '0.14em', color: C.text3, textTransform: 'uppercase' }}>
-            {formatCompetitionName(match.tournament)}
-          </p>
+          <p style={{
+            margin: 0,
+            fontSize: 10,
+            fontWeight: 700,
+            letterSpacing: '0.12em',
+            color: C.text3,
+            textTransform: 'uppercase',
+          }}>
+  {formatCompetitionShortName(match.tournament)} · {formatRoundLabel(match.round, getCompetitionKeyFromTournament(match.tournament))}
+</p>
 
-          <p style={{ margin: '4px 0 0', fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', color: C.text2, textTransform: 'uppercase' }}>
-            {formatRoundLabel(match.round, getCompetitionKeyFromTournament(match.tournament))}
-          </p>
 
           <p style={{ margin: '3px 0 0', fontSize: 11, color: C.text3 }}>
             {match.stadium}
