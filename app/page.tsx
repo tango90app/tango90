@@ -143,8 +143,9 @@ function getCountdownColor(match: Match) {
 
 type HomeProps = {
   searchParams?: {
-    competition?: string
-  }
+  competition?: string
+  round?: string
+}
 }
 
 export default async function Home({ searchParams }: HomeProps) {
