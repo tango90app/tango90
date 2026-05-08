@@ -681,7 +681,7 @@ primaryColor?: string; secondaryColor?: string
 <div style={{
   position: 'absolute',
   inset: 0,
-  borderRadius: 20,
+  borderRadius: 0,
   overflow: 'hidden',
   background: `
     radial-gradient(circle at 50% 48%,
@@ -692,7 +692,7 @@ primaryColor?: string; secondaryColor?: string
     radial-gradient(circle at 50% 50%,
       rgba(0,0,0,0.00) 0%,
       rgba(0,0,0,0.10) 72%,
-      rgba(0,0,0,0.22) 100%
+      rgba(0,0,0,0.28) 100%
     ),
     repeating-linear-gradient(
       to bottom,
@@ -708,7 +708,7 @@ primaryColor?: string; secondaryColor?: string
 <div style={{
   position: 'absolute',
   inset: 0,
-  borderRadius: 20,
+  borderRadius: 0,
   pointerEvents: 'none',
   opacity: 0.035,
   mixBlendMode: 'soft-light',
@@ -722,7 +722,7 @@ primaryColor?: string; secondaryColor?: string
 
       {/* Vignette */}
       <div style={{
-        position: 'absolute', inset: 0, borderRadius: 20,
+        position: 'absolute', inset: 0, borderRadius: 0,
         background: 'radial-gradient(ellipse at 50% 50%, transparent 55%, rgba(0,0,0,0.3) 100%)',
         pointerEvents: 'none',
       }} />
@@ -735,7 +735,7 @@ primaryColor?: string; secondaryColor?: string
       >
         <g stroke="rgba(255,255,255,0.08)" fill="none" strokeWidth="1.25">
           {/* Outer boundary */}
-          <rect x="14" y="14" width={PITCH_W - 28} height={PITCH_H - 28} rx="6" />
+          <rect x="14" y="14" width={PITCH_W - 28} height={PITCH_H - 28} />
           {/* Center line */}
           <line x1="14" y1={PITCH_H / 2} x2={PITCH_W - 14} y2={PITCH_H / 2} />
           {/* Center circle */}
@@ -744,18 +744,18 @@ primaryColor?: string; secondaryColor?: string
           <circle cx={PITCH_W / 2} cy={PITCH_H / 2} r="2.5" fill="rgba(255,255,255,0.16)" />
 
           {/* Top penalty area */}
-          <rect x="84" y="14" width="202" height="85" />
+          <path d="M 84 14 L 84 99 L 286 99 L 286 14" />
           {/* Top goal area */}
-          <rect x="139" y="14" width="92" height="28" />
+          <path d="M 139 14 L 139 42 L 231 42 L 231 14" />
           {/* Top penalty spot */}
           <circle cx={PITCH_W / 2} cy="71" r="2.5" fill="rgba(255,255,255,0.16)" />
           {/* Top penalty arc — small, outside the area, correct orientation */}
           <path d={`M 148 99 A 46 46 0 0 0 221 99`} />
 
           {/* Bottom penalty area */}
-          <rect x="84" y={PITCH_H - 99} width="202" height="85" />
+          <path d={`M 84 ${PITCH_H - 14} L 84 ${PITCH_H - 99} L 286 ${PITCH_H - 99} L 286 ${PITCH_H - 14}`} />
           {/* Bottom goal area */}
-          <rect x="139" y={PITCH_H - 42} width="92" height="28" />
+          <path d={`M 139 ${PITCH_H - 14} L 139 ${PITCH_H - 42} L 231 ${PITCH_H - 42} L 231 ${PITCH_H - 14}`} />
           {/* Bottom penalty spot */}
           <circle cx={PITCH_W / 2} cy={PITCH_H - 71} r="2.5" fill="rgba(255,255,255,0.16)" />
           {/* Bottom penalty arc — outside the area, correct orientation */}
@@ -1136,7 +1136,7 @@ function RowScoreDisplay({ myVote, serverAvg: rawServerAvg, phase, eligible, cta
       {/* Promedio secundario — solo si el usuario votó y hay avg */}
       {showAvg && (
         <span style={{ fontSize: 10, fontWeight: 600, color: 'rgba(255,255,255,0.5)', lineHeight: 1 }}>
-          ∅ {ratingLabel(serverAvg!)}
+          {ratingLabel(serverAvg!)}
         </span>
       )}
     </div>
