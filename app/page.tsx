@@ -30,7 +30,22 @@ function UpcomingBadge() {
 
 function SuspendedBadge() {
   return (
-    <span style={{ background: '#2A1A1A', color: '#EF4444', fontFamily: PJS, fontSize: 10, fontWeight: 700, padding: '2px 7px', borderRadius: 3, letterSpacing: '0.06em' }}>
+    <span style={{
+      fontFamily: 'Oswald, sans-serif',
+      fontSize: 10,
+      fontWeight: 700,
+      borderRadius: 3,
+      letterSpacing: '0.07em',
+
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      minWidth: 64,
+      height: 22,
+
+      background: 'rgba(239,68,68,0.12)',
+      color: '#EF4444',
+    }}>
       SUSPENDIDO
     </span>
   )
@@ -256,7 +271,7 @@ away: normalizeTeam(m.away),
     tournament: row.league_name ?? 'Liga Profesional Argentina',
     round: row.round ?? 'Próximo',
     stadium: '',
-    status: 'upcoming',
+    status: row.status === 'suspended' ? 'suspended' : 'upcoming',
     home: {
   id: getTeamByApiFootballId(row.home_team_id)?.teamKey ?? `api-team-${row.home_team_id}`,
   name: getTeamByApiFootballId(row.home_team_id)?.displayName ?? row.home_name,
@@ -544,11 +559,10 @@ const roundMatches = activeRound
 
             {byDate[date].map(match => (
               <Link
-              key={match.id}
-              href={match.status === 'suspended' ? '#' : `/partido/${match.id}`}
-              onClick={match.status === 'suspended' ? (e) => e.preventDefault() : undefined}
-              style={{ textDecoration: 'none', pointerEvents: match.status === 'suspended' ? 'none' : 'auto' }}
-            >
+  key={match.id}
+  href={match.status === 'finished' || match.status === 'live' ? `/partido/${match.id}` : '#'}
+  style={{ textDecoration: 'none', pointerEvents: match.status === 'finished' || match.status === 'live' ? 'auto' : 'none' }}
+>
                 <div
                   className="match-card"
                   style={{

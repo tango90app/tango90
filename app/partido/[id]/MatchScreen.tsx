@@ -505,7 +505,7 @@ function MatchHeader({ match, processed }: { match: Match; processed: ProcessedM
 
   return (
     <div style={{ background: C.s1, borderBottom: `1px solid ${C.border}` }}>
-      <div style={{ maxWidth: MAX_W, margin: '0 auto', padding: '20px 16px 16px' }}>
+      <div style={{ maxWidth: MAX_W, margin: '0 auto', padding: '14px 16px 12px' }}>
 
         <div style={{ textAlign: 'center', marginBottom: 14 }}>
           <p style={{ margin: 0, fontSize: 10, fontWeight: 700, letterSpacing: '0.14em', color: C.text3, textTransform: 'uppercase' }}>
@@ -526,27 +526,17 @@ function MatchHeader({ match, processed }: { match: Match; processed: ProcessedM
             <div style={{ fontSize: 15, fontWeight: 700, color: C.text }}>{(match.home as any).displayName || match.home.name}</div>
           </div>
 
-          <div style={{ textAlign: 'center', minWidth: 116 }}>
+          <div style={{ textAlign: 'center', minWidth: 92 }}>
             {isFinished ? (
               <>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4 }}>
                   {ps && <span style={{ fontSize: 14, fontWeight: 700, color: C.accent }}>({ps.homeScore})</span>}
-                  <span style={{ fontSize: 52, fontWeight: 800, color: C.text, lineHeight: 1, letterSpacing: '-0.03em' }}>{match.home.score}</span>
+                  <span style={{ fontSize: 38, fontWeight: 800, color: C.text, lineHeight: 1, letterSpacing: '-0.03em' }}>{match.home.score}</span>
                   <span style={{ fontSize: 22, color: C.text3, margin: '0 2px' }}>–</span>
-                  <span style={{ fontSize: 52, fontWeight: 800, color: C.text, lineHeight: 1, letterSpacing: '-0.03em' }}>{match.away.score}</span>
+                  <span style={{ fontSize: 38, fontWeight: 800, color: C.text, lineHeight: 1, letterSpacing: '-0.03em' }}>{match.away.score}</span>
                   {ps && <span style={{ fontSize: 14, fontWeight: 700, color: C.accent }}>({ps.awayScore})</span>}
                 </div>
-                <div style={{ marginTop: 6, display: 'flex', justifyContent: 'center' }}>
-                  <span style={{
-                    fontSize: 9, fontWeight: 700, letterSpacing: '0.1em',
-                    background: ps ? C.accentDim : 'rgba(255,255,255,0.06)',
-                    color: ps ? C.accent : C.text3,
-                    border: `1px solid ${ps ? C.accentBorder : C.border}`,
-                    padding: '2px 10px', borderRadius: 20,
-                  }}>
-                    {ps ? 'FINAL · AET · PEN' : 'FINAL'}
-                  </span>
-                </div>
+                
               </>
             ) : match.status === 'live' ? (
               <>
