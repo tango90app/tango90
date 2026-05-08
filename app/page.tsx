@@ -70,6 +70,7 @@ function getCompetitionKey(match: Match): CompetitionKey {
 
   return 'lpf'
 }
+
 function formatVoteCount(count: number) {
   if (count < 10) return null
   if (count < 25) return '+10 votos'
@@ -83,6 +84,20 @@ function formatVoteCount(count: number) {
   if (count < 10000) return '+5k votos'
   return '+10k votos'
 }
+
+function formatRoundLabel(round?: string) {
+  if (!round) return ''
+
+  const r = round.toLowerCase()
+
+  if (r.includes('round of 16')) return 'APERTURA · 8vos de FINAL'
+  if (r.includes('quarter')) return 'APERTURA · 4tos de FINAL'
+  if (r.includes('semi')) return 'APERTURA · SEMIFINAL'
+  if (r === 'final') return 'APERTURA · FINAL'
+
+  return round.toUpperCase()
+}
+
 function getMatchTimeLabel(match: Match) {
   if (match.status === 'upcoming') {
     return match.time
@@ -256,9 +271,32 @@ const filteredMatches = allMatches.filter(match =>
   getCompetitionKey(match) === activeCompetitionKey
 )
 
+const availableRounds = Array.from(
+  new Set(filteredMatches.map(m => m.round).filter(Boolean))
+).reverse()
+
+const activeRound =
+  searchParams?.round && availableRounds.includes(searchParams.round)
+    ? searchParams.round
+    : availableRounds[availableRounds.length - 1] ?? ''
+
+const activeRoundIndex = availableRounds.indexOf(activeRound)
+
+const previousRound = activeRoundIndex > 0
+  ? availableRounds[activeRoundIndex - 1]
+  : null
+
+const nextRound = activeRoundIndex >= 0 && activeRoundIndex < availableRounds.length - 1
+  ? availableRounds[activeRoundIndex + 1]
+  : null
+
+const roundMatches = activeRound
+  ? filteredMatches.filter(m => m.round === activeRound)
+  : filteredMatches
+
 
   const byDate: Record<string, Match[]> = {}
-  for (const m of filteredMatches) {
+  for (const m of roundMatches) {
     if (!m || !m.date) continue
     if (!byDate[m.date]) byDate[m.date] = []
     byDate[m.date].push(m)
@@ -395,11 +433,46 @@ const filteredMatches = allMatches.filter(match =>
     gridTemplateColumns: '32px 1fr 32px',
     alignItems: 'center',
   }}>
-    <span style={{ fontFamily: PJS, color: '#6B7280', fontSize: 18, textAlign: 'left' }}>‹</span>
+    {previousRound ? (
+  <Link
+    href={`/?competition=${activeCompetitionKey}&round=${encodeURIComponent(previousRound)}`}
+    style={{
+  fontFamily: PJS,
+  color: '#F2F2F2',
+  fontSize: 24,
+  fontWeight: 700,
+  lineHeight: 1,
+  textAlign: 'left',
+  textDecoration: 'none'
+}}
+  >
+    ‹
+  </Link>
+) : (
+  <span style={{ fontFamily: PJS, color: 'rgba(107,114,128,0.25)', fontSize: 18, textAlign: 'left' }}>‹</span>
+)}
     <div style={{ fontFamily: OBJ, fontSize: 18, fontWeight: 600, color: '#FFFFFF', letterSpacing: '0.08em', textAlign: 'center' }}>
-      {(allMatches[0]?.round ?? '').toUpperCase()}
+     {formatRoundLabel(activeRound)} 
+
     </div>
-    <span style={{ fontFamily: PJS, color: '#6B7280', fontSize: 18, textAlign: 'right' }}>›</span>
+    {nextRound ? (
+  <Link
+    href={`/?competition=${activeCompetitionKey}&round=${encodeURIComponent(nextRound)}`}
+    style={{
+  fontFamily: PJS,
+  color: '#F2F2F2',
+  fontSize: 24,
+  fontWeight: 700,
+  lineHeight: 1,
+  textAlign: 'left',
+  textDecoration: 'none'
+}}
+  >
+    ›
+  </Link>
+) : (
+  <span style={{ fontFamily: PJS, color: 'rgba(107,114,128,0.25)', fontSize: 18, textAlign: 'right' }}>›</span>
+)}
   </div>
 </div>
 

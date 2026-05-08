@@ -32,13 +32,14 @@ const normalizeTeam = (team: any) => {
       : getTeamByKey(team.id)
 
   return {
-    ...team,
-    id: mapped?.teamKey ?? team.id,
-    name: mapped?.displayName ?? team.name,
-    shortName: mapped?.abbreviation ?? team.shortName,
-    badge: mapped?.crestPath ?? team.badge,
-  }
-}
+  ...team,
+  id: mapped?.teamKey ?? team.id,
+  name: mapped?.displayName ?? team.name,
+  shortName: mapped?.abbreviation ?? team.shortName,
+  badge: mapped?.crestPath ?? team.badge,
+  primaryColor: mapped?.primaryColor,
+  secondaryColor: mapped?.secondaryColor,
+}}
 
 const normalizedMatch = {
   ...match,

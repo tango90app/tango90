@@ -11,6 +11,7 @@ import type { PlaqueMeta } from '@/app/api/votes/route'
 import type { EntityAverage, MatchAveragesResponse } from '@/app/api/votes/match-averages/route'
 import AdSlot from '@/components/AdSlot'
 
+
 // ── Design tokens ─────────────────────────────────────────────────────────
 const C = {
   bg:          '#0B0B0F',
@@ -40,11 +41,10 @@ function getDisplayScore(
 
 // ── Rating helpers ────────────────────────────────────────────────────────
 function ratingBg(score: number): string {
-  if (score < 4.0) return '#DC2626'
-  if (score < 6.0) return '#EA580C'
-  if (score < 7.0) return '#CA8A04'
-  if (score < 8.0) return '#16A34A'
-  return '#15803D'
+  if (score <= 3) return '#B91D34'      // rojo
+  if (score <= 6) return '#F39C12'      // amarillo
+  if (score <= 9) return '#1DB954'      // verde
+  return '#FBD005'                      // dorado
 }
 function ratingLabel(score: number): string { return score.toFixed(2) }
 
@@ -241,6 +241,7 @@ export default function MatchScreen({ match, processed }: Props) {
 
   const team = activeTeam === 'home' ? processed.home : processed.away
   const isHome = activeTeam === 'home'
+  const visualTeam = activeTeam === 'home' ? match.home : match.away
   const changes   = isHome ? processed.home.validSubstitutions   : processed.away.validSubstitutions
   const subsLimit = isHome ? processed.home.availableSubstitutionsLimit : processed.away.availableSubstitutionsLimit
 
@@ -352,6 +353,8 @@ export default function MatchScreen({ match, processed }: Props) {
               players={team.players}
               matchId={match.id}
               isHome={isHome}
+              primaryColor={(visualTeam as any).primaryColor}
+              secondaryColor={(visualTeam as any).secondaryColor}
               avgsMap={averages?.byTarget ?? {}}
               phase={phase}
               onOpen={openVoting}
@@ -586,8 +589,9 @@ function TeamTab({ team, isActive, teamAvg, onClick }: {
 }
 
 // ── Pitch Section ─────────────────────────────────────────────────────────
-function PitchSection({ players, matchId, isHome, avgsMap, phase, onOpen }: {
+function PitchSection({ players, matchId, isHome, primaryColor, secondaryColor, avgsMap, phase, onOpen }: {
   players: ProcessedPlayer[]; matchId: string; isHome: boolean
+primaryColor?: string; secondaryColor?: string
   avgsMap: Record<string, EntityAverage>
   phase: ReturnType<typeof getMatchPhase>['phase']
   onOpen: (t: VotingTarget) => void
@@ -662,15 +666,17 @@ function PitchSection({ players, matchId, isHome, avgsMap, phase, onOpen }: {
         const y  = lineY[line]
         return linePlayers.map((p, i) => (
           <PlayerChip
-  key={p.id}
-  player={p}
-  matchId={matchId}
-  cx={xs[i]}
-  cy={y}
-  avgData={avgsMap[p.id]}
-  phase={phase}
-  onOpen={onOpen}
-/>
+            key={p.id}
+            player={p}
+            matchId={matchId}
+            cx={xs[i]}  
+            cy={y}
+            primaryColor={primaryColor}
+            secondaryColor={secondaryColor}
+            avgData={avgsMap[p.id]}
+            phase={phase}
+            onOpen={onOpen}
+          />
         ))
       })}
     </div>
@@ -678,8 +684,9 @@ function PitchSection({ players, matchId, isHome, avgsMap, phase, onOpen }: {
 }
 
 // ── FIX 2: Player Chip — no fixed height so name + pill render correctly ──
-function PlayerChip({ player, matchId, cx, cy, avgData, phase, onOpen }: {
+function PlayerChip({ player, matchId, cx, cy, primaryColor, secondaryColor, avgData, phase, onOpen }: {
   player: ProcessedPlayer; matchId: string; cx: number; cy: number
+  primaryColor?: string; secondaryColor?: string
   avgData: EntityAverage | undefined
   phase: ReturnType<typeof getMatchPhase>['phase']
   onOpen: (t: VotingTarget) => void
@@ -735,12 +742,14 @@ function PlayerChip({ player, matchId, cx, cy, avgData, phase, onOpen }: {
       {/* Circle */}
       <div style={{
         width: 32, height: 32, borderRadius: '50%',
-        background: hasVoted ? 'rgba(108,206,255,0.15)' : 'rgba(26,26,34,0.92)',
-        border: hasVoted ? `1.5px solid ${C.accent}` : '1.5px solid rgba(255,255,255,0.22)',
+        background: hasVoted ? (primaryColor ?? 'rgba(26,26,34,0.92)') : 'rgba(38,38,46,0.92)',
+        border: hasVoted ? `2.5px solid ${secondaryColor ?? 'rgba(255,255,255,0.22)'}` : '2.5px solid rgba(255,255,255,0.22)',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
-        fontSize: 12, fontWeight: 700, color: hasVoted ? C.accent : C.text,
+        fontSize: 25, fontWeight: 1, fontFamily: 'T90Numbers, sans-serif', 
+        color: hasVoted ? (secondaryColor ?? C.text) : 'rgba(255,255,255,0.45)',
         position: 'relative', flexShrink: 0,
         backdropFilter: 'blur(4px)',
+        boxShadow: hasVoted ? `0 0 0 1.5px ${primaryColor ?? '#000'}` : '0 0 0 1.5px rgba(255,255,255,0.08)',
       }}>
         {player.number}
         {wasSubbedOut && (
@@ -782,6 +791,9 @@ function PlayerChip({ player, matchId, cx, cy, avgData, phase, onOpen }: {
   alignItems: 'center',
   justifyContent: 'center',
   padding: '0 6px',
+  boxShadow: myVote === 10
+  ? '0 0 10px rgba(212,175,55,0.75), 0 0 18px rgba(212,175,55,0.45)'
+  : 'none',
 }}>
   <span style={{
     fontSize: 12,
@@ -1047,6 +1059,18 @@ function ScoreBadge({ score, eligible, cta }: { score: number | null; eligible: 
 // ── Voting Bottom Sheet — centred on desktop, Supabase-backed ────────────
 // ── Voting Bottom Sheet — centred on desktop, Supabase-backed ────────────
 const RATINGS = [1,2,3,4,5,6,7,8,9,10]
+const RATING_DESCRIPTIONS: Record<number, string> = {
+  1: 'Desastre!',
+  2: 'Horrible',
+  3: 'Muy mal',
+  4: 'Flojo',
+  5: 'Intrascendente',
+  6: 'Cumplió',
+  7: 'Correcto',
+  8: 'Buen partido',
+  9: 'Muy buen partido',
+  10: 'Figura!',
+}
 const SHEET_MAX_W = 480
 
 function VotingSheet({ target, onClose, onVoteSaved, phase }: {
@@ -1063,6 +1087,7 @@ function VotingSheet({ target, onClose, onVoteSaved, phase }: {
   const [hovered, setHovered] = useState<number | null>(null)
   const savedScrollY = useRef<number>(0)
   const isOpen = target !== null
+  const previewRating = hovered ?? myVote
 
   useEffect(() => {
     // Resetear todo antes de cargar — evita arrastre entre entidades
@@ -1268,12 +1293,30 @@ function VotingSheet({ target, onClose, onVoteSaved, phase }: {
                 </div>
               </div>
 
-              {/* Número grande post-voto */}
-              {hasVoted && (
+              {/* Preview de voto / número grande */}
+              {previewRating !== null && (
                 <div style={{ textAlign: 'center', marginBottom: 20 }}>
-                  <span style={{ fontSize: 80, fontWeight: 800, lineHeight: 1, color: ratingBg(myVote!), letterSpacing: '-0.04em', display: 'block' }}>
-                    {myVote}
+                  <span style={{
+                    fontSize: hasVoted ? 80 : 64,
+                    fontWeight: 800,
+                    lineHeight: 1,
+                    color: ratingBg(previewRating),
+                    letterSpacing: '-0.04em',
+                    display: 'block',
+                  }}>
+                    {previewRating}
                   </span>
+
+                  <div style={{
+                    marginTop: 6,
+                    fontSize: 14,
+                    fontWeight: 800,
+                    color: ratingBg(previewRating),
+                    letterSpacing: '0.02em',
+                    textTransform: 'uppercase',
+                  }}>
+                    {RATING_DESCRIPTIONS[previewRating]}
+                  </div>
                 </div>
               )}
 
@@ -1288,6 +1331,8 @@ function VotingSheet({ target, onClose, onVoteSaved, phase }: {
                       onClick={() => handleVote(n)}
                       onMouseEnter={() => setHovered(n)}
                       onMouseLeave={() => setHovered(null)}
+                      onFocus={() => setHovered(n)}
+                      onBlur={() => setHovered(null)}
                       disabled={hasVoted || saving}
                       style={{
                         flex: 1, minWidth: 0, height: 48, borderRadius: 10,

@@ -642,4 +642,10 @@ body {
 ::-webkit-scrollbar-track { background: var(--bg); }
 ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
 
+@font-face {
+  font-family: 'T90Numbers';
+  src: url('/fonts/T90Numbers.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
 
