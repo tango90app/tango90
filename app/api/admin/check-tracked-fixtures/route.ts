@@ -7,6 +7,7 @@ export const revalidate = 0
 
 const AF_BASE = 'https://v3.football.api-sports.io'
 const FINISHED = new Set(['FT', 'AET', 'PEN'])
+const SUSPENDED = new Set(['ABD', 'PST', 'CANC', 'SUSP'])
 
 export async function POST(req: NextRequest) {
   let body: any
@@ -55,6 +56,26 @@ export async function POST(req: NextRequest) {
       const data = await res.json()
       const fixture = data?.response?.[0]
       const status = fixture?.fixture?.status?.short
+
+            if (SUSPENDED.has(status)) {
+        await supabaseServer
+          .from('tracked_fixtures')
+          .update({
+            status: 'suspended',
+            last_checked_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          })
+          .eq('external_fixture_id', f.external_fixture_id)
+
+        results.push({
+          fixtureId: f.external_fixture_id,
+          matchId: f.internal_match_id,
+          status: 'suspended',
+          apiStatus: status,
+        })
+
+        continue
+      }
 
       if (!FINISHED.has(status)) {
         await supabaseServer
