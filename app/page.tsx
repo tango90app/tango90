@@ -85,17 +85,29 @@ function formatVoteCount(count: number) {
   return '+10k votos'
 }
 
-function formatRoundLabel(round?: string) {
+function normalizeRound(round?: string, competitionKey?: CompetitionKey) {
   if (!round) return ''
 
   const r = round.toLowerCase()
 
-  if (r.includes('round of 16')) return 'APERTURA · 8vos de FINAL'
-  if (r.includes('quarter')) return 'APERTURA · 4tos de FINAL'
+  const groupStageMatch = r.match(/group stage\s*-\s*(\d+)/)
+  if (groupStageMatch) return `FASE DE GRUPOS · FECHA ${groupStageMatch[1]}`
+
+  const fechaMatch = r.match(/fecha\s*(\d+)/)
+  if (fechaMatch && competitionKey === 'libertadores') {
+    return `FASE DE GRUPOS · FECHA ${fechaMatch[1]}`
+  }
+
+  if (r.includes('round of 16')) return 'APERTURA · OCTAVOS DE FINAL'
+  if (r.includes('quarter')) return 'APERTURA · CUARTOS DE FINAL'
   if (r.includes('semi')) return 'APERTURA · SEMIFINAL'
   if (r === 'final') return 'APERTURA · FINAL'
 
   return round.toUpperCase()
+}
+
+function formatRoundLabel(round?: string, competitionKey?: CompetitionKey) {
+  return normalizeRound(round, competitionKey)
 }
 
 function getMatchTimeLabel(match: Match) {
@@ -273,7 +285,11 @@ const filteredMatches = allMatches.filter(match =>
 )
 
 const availableRounds = Array.from(
-  new Set(filteredMatches.map(m => m.round).filter(Boolean))
+  new Set(
+    filteredMatches
+      .map(m => normalizeRound(m.round, activeCompetitionKey))
+      .filter(Boolean)
+  )
 ).reverse()
 
 const activeRound =
@@ -292,7 +308,7 @@ const nextRound = activeRoundIndex >= 0 && activeRoundIndex < availableRounds.le
   : null
 
 const roundMatches = activeRound
-  ? filteredMatches.filter(m => m.round === activeRound)
+  ? filteredMatches.filter(m => normalizeRound(m.round, activeCompetitionKey) === activeRound)
   : filteredMatches
 
 
@@ -453,7 +469,7 @@ const roundMatches = activeRound
   <span style={{ fontFamily: PJS, color: 'rgba(107,114,128,0.25)', fontSize: 18, textAlign: 'left' }}>‹</span>
 )}
     <div style={{ fontFamily: OBJ, fontSize: 18, fontWeight: 600, color: '#FFFFFF', letterSpacing: '0.08em', textAlign: 'center' }}>
-     {formatRoundLabel(activeRound)} 
+     {formatRoundLabel(activeRound, activeCompetitionKey)} 
 
     </div>
     {nextRound ? (
