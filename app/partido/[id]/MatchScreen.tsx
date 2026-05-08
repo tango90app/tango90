@@ -680,7 +680,7 @@ primaryColor?: string; secondaryColor?: string
       {/* Pitch background with rounded corners via border-radius */}
       <div style={{
         position: 'absolute', inset: 0, borderRadius: 20,
-        background: 'repeating-linear-gradient(to bottom,#0D2B14 0px,#0D2B14 71px,#0C2813 71px,#0C2813 142px)',
+        background: 'repeating-linear-gradient(to bottom,#0D2B14 0px,#0D2B14 71px,#0C2A13 71px,#0C2A13 142px)',
         overflow: 'hidden',
       }} />
 
@@ -697,7 +697,7 @@ primaryColor?: string; secondaryColor?: string
         viewBox={`0 0 ${PITCH_W} ${PITCH_H}`}
         style={{ position: 'absolute', top: 0, left: 0, borderRadius: 20, overflow: 'hidden' }}
       >
-        <g stroke="rgba(255,255,255,0.16)" fill="none" strokeWidth="2">
+        <g stroke="rgba(255,255,255,0.08)" fill="none" strokeWidth="1.25">
           {/* Outer boundary */}
           <rect x="14" y="14" width={PITCH_W - 28} height={PITCH_H - 28} rx="6" />
           {/* Center line */}
