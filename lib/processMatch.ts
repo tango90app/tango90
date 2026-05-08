@@ -107,7 +107,7 @@ export type ProcessedMatch = {
   tournament: string
   round: string
   stadium: string
-  status: 'live' | 'finished' | 'upcoming'
+  status: 'live' | 'finished' | 'upcoming' | 'suspended'
   referee: { id: string; name: string }
   rules: MatchRules
   periods?: MatchPeriods

@@ -70,7 +70,7 @@ export type Match = {
   tournament: string
   round: string
   stadium: string
-  status: 'live' | 'finished' | 'upcoming' | 'suspended'
+  status: 'live' | 'finished' | 'upcoming'
   home: Team
   away: Team
   referee: { id: string; name: string }
