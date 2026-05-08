@@ -28,6 +28,14 @@ function UpcomingBadge() {
   )
 }
 
+function SuspendedBadge() {
+  return (
+    <span style={{ background: '#2A1A1A', color: '#EF4444', fontFamily: PJS, fontSize: 10, fontWeight: 700, padding: '2px 7px', borderRadius: 3, letterSpacing: '0.06em' }}>
+      SUSPENDIDO
+    </span>
+  )
+}
+
 function formatDate(dateStr: string) {
   const d = new Date(dateStr + 'T00:00:00')
   return d.toLocaleDateString('es-AR', { weekday: 'short', day: 'numeric', month: 'short' }).toUpperCase()
@@ -535,7 +543,12 @@ const roundMatches = activeRound
             </div>
 
             {byDate[date].map(match => (
-              <Link key={match.id} href={`/partido/${match.id}`} style={{ textDecoration: 'none' }}>
+              <Link
+              key={match.id}
+              href={match.status === 'suspended' ? '#' : `/partido/${match.id}`}
+              onClick={match.status === 'suspended' ? (e) => e.preventDefault() : undefined}
+              style={{ textDecoration: 'none', pointerEvents: match.status === 'suspended' ? 'none' : 'auto' }}
+            >
                 <div
                   className="match-card"
                   style={{
@@ -632,6 +645,7 @@ const roundMatches = activeRound
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                     {match.status === 'live' && <LiveBadge />}
                     {match.status === 'upcoming' && <UpcomingBadge />}
+                    {match.status === 'suspended' && <SuspendedBadge />}
                     {match.status === 'finished' && (
   <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
     <MatchStatusBadge

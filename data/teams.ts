@@ -201,8 +201,8 @@ export const TEAMS: TangoTeam[] = [
     displayName: 'Platense',
     abbreviation: 'CAP',
     crestPath: '/logos/teams/platense.svg',
-    primaryColor: '#FFFFFF',
-    secondaryColor: '#8B5E3C',
+    primaryColor: '#8B5E3C',
+    secondaryColor: '#FFFFFF',
   },
   {
     teamKey: 'sarmiento',
