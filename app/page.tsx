@@ -90,18 +90,49 @@ function normalizeRound(round?: string, competitionKey?: CompetitionKey) {
 
   const r = round.toLowerCase()
 
-  const groupStageMatch = r.match(/group stage\s*-\s*(\d+)/)
-  if (groupStageMatch) return `FASE DE GRUPOS · FECHA ${groupStageMatch[1]}`
+  // ── LIBERTADORES ─────────────────────────────────────────────
+  if (competitionKey === 'libertadores') {
+    const groupStageMatch =
+      r.match(/group stage\s*-\s*(\d+)/) ||
+      r.match(/fecha\s*(\d+)/)
 
-  const fechaMatch = r.match(/fecha\s*(\d+)/)
-  if (fechaMatch && competitionKey === 'libertadores') {
-    return `FASE DE GRUPOS · FECHA ${fechaMatch[1]}`
+    if (groupStageMatch) {
+      return `FASE DE GRUPOS · FECHA ${groupStageMatch[1]}`
+    }
+
+    if (r.includes('round of 16')) {
+      if (r.includes('2nd')) return '8vos de FINAL · VUELTA'
+      return '8vos de FINAL · IDA'
+    }
+
+    if (r.includes('quarter')) {
+      if (r.includes('2nd')) return '4tos de FINAL · VUELTA'
+      return '4tos de FINAL · IDA'
+    }
+
+    if (r.includes('semi')) {
+      if (r.includes('2nd')) return 'SEMIFINAL · VUELTA'
+      return 'SEMIFINAL · IDA'
+    }
+
+    if (r === 'final') {
+      return 'FINAL'
+    }
   }
 
-  if (r.includes('round of 16')) return 'APERTURA · OCTAVOS DE FINAL'
-  if (r.includes('quarter')) return 'APERTURA · CUARTOS DE FINAL'
-  if (r.includes('semi')) return 'APERTURA · SEMIFINAL'
-  if (r === 'final') return 'APERTURA · FINAL'
+  // ── LPF ──────────────────────────────────────────────────────
+  if (competitionKey === 'lpf') {
+    const fechaMatch = r.match(/fecha\s*(\d+)/)
+
+    if (fechaMatch) {
+      return `APERTURA · FECHA ${fechaMatch[1]}`
+    }
+
+    if (r.includes('round of 16')) return 'APERTURA · 8vos de FINAL'
+    if (r.includes('quarter')) return 'APERTURA · 4tos de FINAL'
+    if (r.includes('semi')) return 'APERTURA · SEMIFINAL'
+    if (r === 'final') return 'APERTURA · FINAL'
+  }
 
   return round.toUpperCase()
 }

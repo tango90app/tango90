@@ -122,6 +122,68 @@ function formatCompetitionName(name: string) {
   return name.toUpperCase()
 }
 
+function getCompetitionKeyFromTournament(tournament?: string) {
+  const t = (tournament ?? '').toLowerCase()
+
+  if (t.includes('libertadores')) return 'libertadores'
+  if (t.includes('sudamericana')) return 'sudamericana'
+  if (t.includes('world cup') || t.includes('mundial')) return 'mundial'
+
+  return 'lpf'
+}
+
+function formatRoundLabel(round?: string, competitionKey?: string) {
+  if (!round) return ''
+
+  const r = round.toLowerCase()
+
+  // ── LIBERTADORES ─────────────────────────────────────────────
+  if (competitionKey === 'libertadores') {
+    const groupStageMatch =
+      r.match(/group stage\s*-\s*(\d+)/) ||
+      r.match(/fecha\s*(\d+)/)
+
+    if (groupStageMatch) {
+      return `FASE DE GRUPOS · FECHA ${groupStageMatch[1]}`
+    }
+
+    if (r.includes('round of 16')) {
+      if (r.includes('2nd')) return 'OCTAVOS DE FINAL · VUELTA'
+      return 'OCTAVOS DE FINAL · IDA'
+    }
+
+    if (r.includes('quarter')) {
+      if (r.includes('2nd')) return 'CUARTOS DE FINAL · VUELTA'
+      return 'CUARTOS DE FINAL · IDA'
+    }
+
+    if (r.includes('semi')) {
+      if (r.includes('2nd')) return 'SEMIFINAL · VUELTA'
+      return 'SEMIFINAL · IDA'
+    }
+
+    if (r === 'final') {
+      return 'FINAL'
+    }
+  }
+
+  // ── LPF ──────────────────────────────────────────────────────
+  if (competitionKey === 'lpf') {
+    const fechaMatch = r.match(/fecha\s*(\d+)/)
+
+    if (fechaMatch) {
+      return `APERTURA · FECHA ${fechaMatch[1]}`
+    }
+
+    if (r.includes('round of 16')) return 'APERTURA · OCTAVOS DE FINAL'
+    if (r.includes('quarter')) return 'APERTURA · CUARTOS DE FINAL'
+    if (r.includes('semi')) return 'APERTURA · SEMIFINAL'
+    if (r === 'final') return 'APERTURA · FINAL'
+  }
+
+  return round.toUpperCase()
+}
+
 function ratingColor(score: number) {
   if (score >= 8) return '#22C55E'   // verde
   if (score >= 6) return '#EAB308'   // amarillo
@@ -449,8 +511,13 @@ function MatchHeader({ match, processed }: { match: Match; processed: ProcessedM
           <p style={{ margin: 0, fontSize: 10, fontWeight: 700, letterSpacing: '0.14em', color: C.text3, textTransform: 'uppercase' }}>
             {formatCompetitionName(match.tournament)}
           </p>
-          <p style={{ margin: '2px 0 0', fontSize: 11, color: C.text3 }}>
-            {match.round} · {match.stadium}
+
+          <p style={{ margin: '4px 0 0', fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', color: C.text2, textTransform: 'uppercase' }}>
+            {formatRoundLabel(match.round, getCompetitionKeyFromTournament(match.tournament))}
+          </p>
+
+          <p style={{ margin: '3px 0 0', fontSize: 11, color: C.text3 }}>
+            {match.stadium}
           </p>
         </div>
 
