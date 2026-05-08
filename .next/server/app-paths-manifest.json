@@ -1,7 +1,4 @@
 {
   "/page": "app/page.js",
-  "/partido/[id]/page": "app/partido/[id]/page.js",
-  "/api/votes/progress/route": "app/api/votes/progress/route.js",
-  "/api/votes/match-averages/route": "app/api/votes/match-averages/route.js",
-  "/_not-found/page": "app/_not-found/page.js"
+  "/partido/[id]/page": "app/partido/[id]/page.js"
 }

@@ -77,7 +77,7 @@ function cacheMyVote(entityId: string, value: number) {
   } catch {}
 }
 // ── Pitch constants ───────────────────────────────────────────────────────
-const PITCH_W = 336
+const PITCH_W = 369
 const PITCH_H = 568
 // Total chip height: circle(32) + gap(5) + name(13) + gap(4) + pill(20) = 74px
 // Position anchor: centre of the circle
@@ -703,27 +703,27 @@ primaryColor?: string; secondaryColor?: string
           {/* Center line */}
           <line x1="14" y1={PITCH_H / 2} x2={PITCH_W - 14} y2={PITCH_H / 2} />
           {/* Center circle */}
-          <circle cx={PITCH_W / 2} cy={PITCH_H / 2} r="44" />
+          <circle cx={PITCH_W / 2} cy={PITCH_H / 2} r="46" />
           {/* Center spot */}
           <circle cx={PITCH_W / 2} cy={PITCH_H / 2} r="2.5" fill="rgba(255,255,255,0.16)" />
 
           {/* Top penalty area */}
-          <rect x="92" y="14" width="152" height="88" />
+          <rect x="84" y="14" width="202" height="85" />
           {/* Top goal area */}
-          <rect x="124" y="14" width="88" height="32" />
+          <rect x="139" y="14" width="92" height="28" />
           {/* Top penalty spot */}
-          <circle cx={PITCH_W / 2} cy="82" r="2" fill="rgba(255,255,255,0.16)" />
+          <circle cx={PITCH_W / 2} cy="71" r="2.5" fill="rgba(255,255,255,0.16)" />
           {/* Top penalty arc — small, outside the area, correct orientation */}
-          <path d={`M 108 102 A 40 40 0 0 0 228 102`} />
+          <path d={`M 148 99 A 46 46 0 0 0 221 99`} />
 
           {/* Bottom penalty area */}
-          <rect x="92" y={PITCH_H - 102} width="152" height="88" />
+          <rect x="84" y={PITCH_H - 99} width="202" height="85" />
           {/* Bottom goal area */}
-          <rect x="124" y={PITCH_H - 46} width="88" height="32" />
+          <rect x="139" y={PITCH_H - 42} width="92" height="28" />
           {/* Bottom penalty spot */}
-          <circle cx={PITCH_W / 2} cy={PITCH_H - 82} r="2" fill="rgba(255,255,255,0.16)" />
+          <circle cx={PITCH_W / 2} cy={PITCH_H - 71} r="2.5" fill="rgba(255,255,255,0.16)" />
           {/* Bottom penalty arc — outside the area, correct orientation */}
-          <path d={`M 108 ${PITCH_H - 102} A 40 40 0 0 1 228 ${PITCH_H - 102}`} />
+          <path d={`M 148 ${PITCH_H - 99} A 46 46 0 0 1 221 ${PITCH_H - 99}`} />
         </g>
       </svg>
 
