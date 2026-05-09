@@ -1551,32 +1551,64 @@ function ProgressBar({ voted, total, phase }: {
       : `${voted}/${total} calificados`
 
   return (
+  <div style={{
+    position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 150,
+    background: 'rgba(11,11,15,0.92)',
+    borderTop: '1px solid rgba(255,255,255,0.05)',
+    padding: '7px 16px 10px',
+    backdropFilter: 'blur(12px)',
+  }}>
     <div style={{
-      position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 150,
-      background: 'rgba(11,11,15,0.97)', borderTop: `1px solid ${C.border}`,
-      padding: '8px 16px 12px',
+      maxWidth: 680,
+      margin: '0 auto',
+      display: 'grid',
+      gridTemplateColumns: '1fr 36px',
+      alignItems: 'end',
+      gap: 12,
     }}>
-      <div style={{ maxWidth: 680, margin: '0 auto' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-          <span style={{ fontSize: 10, color: C.text3, fontWeight: 600, letterSpacing: '0.08em' }}>
+      <div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 5 }}>
+          <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.36)', fontWeight: 600, letterSpacing: '0.10em' }}>
             CALIFICACIONES
           </span>
-          <span style={{ fontSize: 10, color: pct === 100 ? '#22c55e' : C.text3, fontWeight: 700 }}>
+          <span style={{ fontSize: 9, color: pct === 100 ? 'rgba(63,165,106,0.95)' : 'rgba(255,255,255,0.46)', fontWeight: 600 }}>
             {label}
           </span>
         </div>
-        <div style={{ height: 3, background: C.s3, borderRadius: 2, overflow: 'hidden' }}>
+
+        <div style={{ height: 2, background: 'rgba(255,255,255,0.08)', borderRadius: 2, overflow: 'hidden' }}>
           <div style={{
             height: '100%',
             width: `${pct}%`,
-            background: pct === 100 ? '#22c55e' : C.accent,
+            background: pct === 100 ? 'rgba(63,165,106,0.95)' : 'rgba(251,208,5,0.82)',
             borderRadius: 2,
             transition: 'width 400ms ease',
           }} />
         </div>
       </div>
+
+      <button
+        aria-label="Compartir placa"
+        disabled={pct < 100}
+        style={{
+          width: 36,
+          height: 28,
+          borderRadius: 10,
+          border: '1px solid rgba(255,255,255,0.08)',
+          background: pct === 100 ? 'rgba(251,208,5,0.12)' : 'rgba(255,255,255,0.03)',
+          color: pct === 100 ? '#FBD005' : 'rgba(255,255,255,0.22)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          cursor: pct === 100 ? 'pointer' : 'default',
+          opacity: pct === 100 ? 1 : 0.55,
+        }}
+      >
+        ↗
+      </button>
     </div>
-  )
+  </div>
+)
 }
 
 // ── Banner de votación cerrada ────────────────────────────────────────────
