@@ -763,7 +763,7 @@ const roundMatches = activeRound
             <br />
             No afiliada a AFA, LPF, FIFA, CONMEBOL ni clubes oficiales.
             <br />
-            Los nombres, escudos y marcas pertenecen a sus respectivos titulares.
+            Los nombres, escudos y marcas pertenecen a sus respectivos titulares y son utilizados únicamente con fines identificatorios e informativos.
           </div>
         </footer>
         

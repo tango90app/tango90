@@ -2,6 +2,14 @@ import type { Metadata } from 'next'
 import Script from 'next/script'
 import './globals.css'
 
+const globalFooterLinkStyle = {
+  color: 'rgba(255,255,255,0.55)',
+  fontSize: 11,
+  fontWeight: 600,
+  textDecoration: 'none',
+  letterSpacing: '0.04em',
+}
+
 export const metadata: Metadata = {
   title: 'Tango90 | Calificá a los jugadores',
   description: 'La plataforma argentina para calificar jugadores, técnicos y árbitros',
@@ -21,20 +29,37 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
 
       <body style={{ margin: 0, padding: 0, display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-        <div style={{ flex: 1 }}>
+                <div style={{ flex: 1 }}>
           {children}
         </div>
 
         <footer style={{
-          textAlign: 'center',
-          fontSize: 10,
-          color: '#6B7280',
-          padding: '14px 16px 18px',
-          lineHeight: 1.4,
+          borderTop: '1px solid rgba(255,255,255,0.06)',
+          padding: '16px 20px',
+          display: 'flex',
+          justifyContent: 'center',
+          gap: 16,
+          flexWrap: 'wrap',
+          background: '#0B0B0F',
         }}>
-          <div>El juego compulsivo es perjudicial para vos y tu familia.</div>
-          <div>Si sos menor, no podés apostar.</div>
+          <a href="/terminos" style={globalFooterLinkStyle}>
+            Términos
+          </a>
+
+          <a href="/privacidad" style={globalFooterLinkStyle}>
+            Privacidad
+          </a>
+
+          <a href="/faq" style={globalFooterLinkStyle}>
+            FAQ
+          </a>
+
+          <a href="/contacto" style={globalFooterLinkStyle}>
+            Contacto
+          </a>
         </footer>
+
+        
       </body>
     </html>
   )
