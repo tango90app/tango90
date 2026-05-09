@@ -320,12 +320,7 @@ for (const row of voteRows ?? []) {
   voteCountsByMatchId[matchId] = (voteCountsByMatchId[matchId] ?? 0) + 1
 }
 
-  const activeCompetitionKey = (
-  searchParams?.competition &&
-  COMPETITIONS.some(c => c.key === searchParams.competition)
-    ? searchParams.competition
-    : 'lpf'
-) as CompetitionKey
+  const activeCompetitionKey = 'lpf' as CompetitionKey
 
 const activeCompetition =
   COMPETITIONS.find(c => c.key === activeCompetitionKey) ?? COMPETITIONS[0]
@@ -346,20 +341,12 @@ const availableRounds = Array.from(
   )
 ).reverse()
 
-const activeRound =
-  searchParams?.round && availableRounds.includes(searchParams.round)
-    ? searchParams.round
-    : availableRounds[availableRounds.length - 1] ?? ''
+const activeRound = 'APERTURA · 8vos de FINAL'
 
 const activeRoundIndex = availableRounds.indexOf(activeRound)
 
-const previousRound = activeRoundIndex > 0
-  ? availableRounds[activeRoundIndex - 1]
-  : null
-
-const nextRound = activeRoundIndex >= 0 && activeRoundIndex < availableRounds.length - 1
-  ? availableRounds[activeRoundIndex + 1]
-  : null
+const previousRound = null
+const nextRound = null
 
 const roundMatches = activeRound
   ? filteredMatches.filter(m => normalizeRound(m.round, activeCompetitionKey) === activeRound)
@@ -372,7 +359,33 @@ const roundMatches = activeRound
     if (!byDate[m.date]) byDate[m.date] = []
     byDate[m.date].push(m)
   }
-  const dates = Object.keys(byDate).sort((a, b) => b.localeCompare(a))
+
+  for (const date in byDate) {
+  byDate[date].sort((a, b) => {
+
+    const aFinished = a.status === 'finished'
+    const bFinished = b.status === 'finished'
+
+    // Terminados arriba
+    if (aFinished && !bFinished) return -1
+    if (!aFinished && bFinished) return 1
+
+    // Entre terminados:
+    // más reciente primero
+    if (aFinished && bFinished) {
+      const aEnd = a.match_end_at ? new Date(a.match_end_at).getTime() : 0
+      const bEnd = b.match_end_at ? new Date(b.match_end_at).getTime() : 0
+
+      return bEnd - aEnd
+    }
+
+    // Entre próximos:
+    // orden cronológico normal
+    return a.time.localeCompare(b.time)
+  })
+}
+
+  const dates = Object.keys(byDate).sort((a, b) => a.localeCompare(b))
 
   return (
     <div style={{ background: '#0B0B0F', minHeight: '100vh' }}>
@@ -407,8 +420,8 @@ const roundMatches = activeRound
 </a>
         <div style={{ position: 'relative' }}>
   <button
-    popoverTarget="competition-menu"
-    aria-label="Abrir menú"
+    aria-label="Menú desactivado"
+    disabled
     style={{
       width: 32,
       height: 32,
@@ -420,7 +433,8 @@ const roundMatches = activeRound
       justifyContent: 'center',
       alignItems: 'center',
       gap: 5,
-      cursor: 'pointer',
+      cursor: 'default',
+      opacity: 0.45,
     }}
   >
     <span style={{ width: 22, height: 2, background: '#9CA3AF', borderRadius: 2 }} />
