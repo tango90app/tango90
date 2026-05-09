@@ -433,16 +433,20 @@ export default function MatchScreen({ match, processed }: Props) {
             <AdSlot />
 
             <div style={{ marginTop: 16 }}>
-              <CoachRow
-                matchId={match.id}
-                coach={team.coach}
-                changes={changes}
-                subsLimit={subsLimit}
-                avgData={averages?.byTarget[team.coach.id]}
-                phase={phase}
-                onOpen={openVoting}
-              />
+            <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.12em', color: C.text3, marginBottom: 8, paddingLeft: 4 }}>
+              DIRECTOR TÉCNICO
             </div>
+
+            <CoachRow
+              matchId={match.id}
+              coach={team.coach}
+              changes={changes}
+              subsLimit={subsLimit}
+              avgData={averages?.byTarget[team.coach.id]}
+              phase={phase}
+              onOpen={openVoting}
+            />
+          </div>
 
             <SubsList
               players={team.players}
@@ -478,8 +482,10 @@ export default function MatchScreen({ match, processed }: Props) {
 
       {/* ── Fase: banner si está cerrada ────────────────────────────────── */}
       {isFinished && phase === 'voting_closed' && (
-        <ClosedBanner />
-      )}
+  <div style={{ marginTop: 20 }}>
+    <ClosedBanner />
+  </div>
+)}
 
       {/* ── Voting Bottom Sheet ───────────────────────────────────────────── */}
       <VotingSheet
@@ -967,12 +973,20 @@ function CoachRow({ matchId, coach, changes, subsLimit, avgData, phase, onOpen }
       })}
       style={{ width: '100%', background: C.s1, border: `1px solid ${C.border}`, borderRadius: 12, padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer', textAlign: 'left', transition: 'background 120ms' }}>
       <div style={{ flex: 1 }}>
-        <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.12em', color: C.text3, marginBottom: 3 }}>DIRECTOR TÉCNICO</div>
-        <div style={{ fontSize: 14, fontWeight: 700, color: C.text }}>{coach.name}</div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span style={{ fontSize: 14, fontWeight: 700, color: C.text }}>
+            {coach.name}
+          </span>
+          <span style={{
+            fontSize: 11,
+            fontWeight: 600,
+            color: changes > 0 ? C.accent : C.text3,
+            opacity: 0.75,
+          }}>
+            ⇄ {changes}/{subsLimit}
+          </span>
+        </div>
       </div>
-      <span style={{ fontSize: 11, fontWeight: 600, color: changes > 0 ? C.accent : C.text3, background: changes > 0 ? C.accentDim : 'transparent', border: `1px solid ${changes > 0 ? C.accentBorder : C.border}`, padding: '3px 8px', borderRadius: 8, flexShrink: 0 }}>
-        ⇄ {changes}/{subsLimit}
-      </span>
       <RowScoreDisplay myVote={myVote} serverAvg={avgData?.avg ?? null} phase={phase} eligible />
     </button>
   )
@@ -990,7 +1004,7 @@ function SubsList({ players, matchId, avgsMap, phase, onOpen }: {
   return (
     <div style={{ marginTop: 12 }}>
       <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.12em', color: C.text3, marginBottom: 8, paddingLeft: 4 }}>SUPLENTES</div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
         {subs.map(p => <SubRow key={p.id} player={p} matchId={matchId} avgData={avgsMap[p.id]} phase={phase} onOpen={onOpen} />)}
       </div>
     </div>
@@ -1028,7 +1042,7 @@ function SubRow({ player, matchId, avgData, phase, onOpen }: {
           eligible:   player.eligibleForVoting,
         })
       }}
-      style={{ width: '100%', background: C.s1, border: `1px solid ${C.border}`, borderRadius: 10, padding: '0 14px', height: 44, display: 'flex', alignItems: 'center', gap: 10, cursor: player.eligibleForVoting ? 'pointer' : 'default', textAlign: 'left', transition: 'background 120ms' }}>
+      style={{ width: '100%', background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.045)', borderRadius: 8, padding: '0 13px', height: 38 , display: 'flex', alignItems: 'center', gap: 9, cursor: player.eligibleForVoting ? 'pointer' : 'default', textAlign: 'left', transition: 'background 120ms' }}>
       <div style={{ width: 26, height: 26, borderRadius: '50%', background: C.s2, border: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, color: C.text2, flexShrink: 0 }}>
         {player.number}
       </div>
@@ -1061,7 +1075,7 @@ function RefereeRow({ matchId, referee, avgData, phase, onOpen }: {
 
   return (
     <div style={{ marginTop: 24 }}>
-      <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.12em', color: C.text3, marginBottom: 8, paddingLeft: 4 }}>ÁRBITRO</div>
+      <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.12em', color: C.text3, marginBottom: 8, paddingLeft: 4 }}>ÁRBITRO PRINCIPAL</div>
       <button onClick={() => onOpen({
           entityId,
           matchId,
@@ -1074,7 +1088,6 @@ function RefereeRow({ matchId, referee, avgData, phase, onOpen }: {
         style={{ width: '100%', background: C.s1, border: `1px solid ${C.border}`, borderRadius: 12, padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer', textAlign: 'left' }}>
         <div style={{ flex: 1 }}>
           <div style={{ fontSize: 13, fontWeight: 600, color: C.text }}>{referee.name}</div>
-          <div style={{ fontSize: 11, color: C.text3, marginTop: 1 }}>Árbitro principal</div>
         </div>
         <RowScoreDisplay myVote={myVote} serverAvg={avgData?.avg ?? null} phase={phase} eligible cta />
       </button>
@@ -1123,22 +1136,22 @@ function RowScoreDisplay({ myVote, serverAvg: rawServerAvg, phase, eligible, cta
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, flexShrink: 0 }}>
-      {hasVoted ? (
-        <div style={{ minWidth: 36, height: 28, borderRadius: 8, background: ratingBg(myVote!), display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 6px' }}>
-          <span style={{ fontSize: 13, fontWeight: 800, color: '#fff', lineHeight: 1 }}>{String(myVote!)}</span>
-        </div>
-      ) : showAvg ? (
-        <div style={{ minWidth: 36, height: 28, borderRadius: 8, background: C.s2, border: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 6px' }}>
-          <span style={{ fontSize: 13, fontWeight: 700, color: C.text2, lineHeight: 1 }}>{ratingLabel(serverAvg!)}</span>
-        </div>
-      ) : null}
-      {/* Promedio secundario — solo si el usuario votó y hay avg */}
+    <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
       {showAvg && (
         <span style={{ fontSize: 10, fontWeight: 600, color: 'rgba(255,255,255,0.5)', lineHeight: 1 }}>
           {ratingLabel(serverAvg!)}
         </span>
       )}
+
+      {hasVoted ? (
+        <div style={{ minWidth: 30, height: 22, borderRadius: 7, background: ratingBg(myVote!), display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 5px' }}>
+          <span style={{ fontSize: 11, fontWeight: 800, color: '#fff', lineHeight: 1 }}>{String(myVote!)}</span>
+        </div>
+      ) : showAvg ? (
+        <div style={{ minWidth: 30, height: 22, borderRadius: 7, background: C.s2, border: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 5px' }}>
+          <span style={{ fontSize: 11, fontWeight: 700, color: C.text2, lineHeight: 1 }}>{ratingLabel(serverAvg!)}</span>
+        </div>
+      ) : null}
     </div>
   )
 }
@@ -1544,30 +1557,49 @@ function ProgressBar({ voted, total, phase }: {
 // ── Banner de votación cerrada ────────────────────────────────────────────
 function ClosedBanner() {
   return (
-    <div style={{
-      background: 'rgba(239,68,68,0.08)',
-      border: `1px solid rgba(239,68,68,0.2)`,
-      borderRadius: 12,
-      padding: '12px 16px',
-      margin: '0 16px 16px',
-      maxWidth: 680 - 32,
-      marginLeft: 'auto',
-      marginRight: 'auto',
-      display: 'flex',
-      alignItems: 'center',
-      gap: 10,
+  <div style={{
+    background: 'rgba(255,255,255,0.025)',
+    border: '1px solid rgba(255,255,255,0.05)',
+    borderRadius: 10,
+    padding: '10px 14px',
+    margin: '0 16px 16px',
+    maxWidth: 680 - 32,
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    display: 'flex',
+    alignItems: 'center',
+    gap: 10,
+  }}>
+    <span style={{
+      fontSize: 14,
+      opacity: 0.45,
+      filter: 'grayscale(1)',
     }}>
-      <span style={{ fontSize: 16 }}>🔒</span>
-      <div>
-        <p style={{ margin: 0, fontSize: 12, fontWeight: 700, color: '#ef4444', letterSpacing: '0.06em' }}>
-          VOTACIÓN CERRADA
-        </p>
-        <p style={{ margin: '2px 0 0', fontSize: 11, color: C.text3 }}>
-          La ventana de 24 horas ya finalizó
-        </p>
-      </div>
+      🔒
+    </span>
+
+    <div>
+      <p style={{
+        margin: 0,
+        fontSize: 11,
+        fontWeight: 700,
+        color: C.text2,
+        letterSpacing: '0.08em',
+        textTransform: 'uppercase',
+      }}>
+        Votación cerrada
+      </p>
+
+      <p style={{
+        margin: '2px 0 0',
+        fontSize: 11,
+        color: C.text3,
+      }}>
+        La ventana de 24 horas finalizó
+      </p>
     </div>
-  )
+  </div>
+)
 }
 
 // ── Toast de placas desbloqueadas ─────────────────────────────────────────
