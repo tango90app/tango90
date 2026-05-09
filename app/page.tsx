@@ -9,6 +9,13 @@ import AdSlot from '@/components/AdSlot'
 
 const PJS = "'Plus Jakarta Sans', sans-serif"
 const OBJ = "'Plus Jakarta Sans', sans-serif"
+const footerLinkStyle = {
+  color: 'rgba(255,255,255,0.72)',
+  fontSize: 12,
+  fontWeight: 600,
+  textDecoration: 'none',
+  letterSpacing: '0.04em',
+}
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
@@ -714,7 +721,51 @@ const roundMatches = activeRound
           </div>
         ))}
 
-        <AdSlot type="large" />
+                <AdSlot type="large" />
+
+        <footer style={{
+          marginTop: 40,
+          borderTop: '1px solid rgba(255,255,255,0.06)',
+          padding: '24px 0 40px',
+        }}>
+          <div style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: 14,
+            justifyContent: 'center',
+            marginBottom: 18,
+          }}>
+            <Link href="/terminos" style={footerLinkStyle}>
+              Términos
+            </Link>
+
+            <Link href="/privacidad" style={footerLinkStyle}>
+              Privacidad
+            </Link>
+
+            <Link href="/faq" style={footerLinkStyle}>
+              FAQ
+            </Link>
+
+            <Link href="/contacto" style={footerLinkStyle}>
+              Contacto
+            </Link>
+          </div>
+
+          <div style={{
+            textAlign: 'center',
+            fontSize: 11,
+            lineHeight: 1.5,
+            color: 'rgba(255,255,255,0.38)',
+            padding: '0 10px',
+          }}>
+            Tango90 es una plataforma independiente de calificaciones y estadísticas generadas por usuarios.
+            <br />
+            No afiliada a AFA, LPF, FIFA, CONMEBOL ni clubes oficiales.
+            <br />
+            Los nombres, escudos y marcas pertenecen a sus respectivos titulares.
+          </div>
+        </footer>
         
       </div>
 
