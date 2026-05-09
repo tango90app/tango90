@@ -451,6 +451,8 @@ export default function MatchScreen({ match, processed }: Props) {
             <SubsList
               players={team.players}
               matchId={match.id}
+              primaryColor={(visualTeam as any).primaryColor}
+              secondaryColor={(visualTeam as any).secondaryColor}
               avgsMap={averages?.byTarget ?? {}}
               phase={phase}
               onOpen={openVoting}
@@ -971,7 +973,7 @@ function CoachRow({ matchId, coach, changes, subsLimit, avgData, phase, onOpen }
         position:   'DT',
         eligible:   true,
       })}
-      style={{ width: '100%', background: C.s1, border: `1px solid ${C.border}`, borderRadius: 12, padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer', textAlign: 'left', transition: 'background 120ms' }}>
+      style={{ width: '100%', background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.045)', borderRadius: 8, padding: '0 13px', height: 44, display: 'flex', alignItems: 'center', gap: 9, cursor: 'pointer', textAlign: 'left', transition: 'background 120ms' }}>
       <div style={{ flex: 1 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <span style={{ fontSize: 14, fontWeight: 700, color: C.text }}>
@@ -993,8 +995,9 @@ function CoachRow({ matchId, coach, changes, subsLimit, avgData, phase, onOpen }
 }
 
 // ── Subs List ─────────────────────────────────────────────────────────────
-function SubsList({ players, matchId, avgsMap, phase, onOpen }: {
+function SubsList({ players, matchId, primaryColor, secondaryColor, avgsMap, phase, onOpen }: {
   players: ProcessedPlayer[]; matchId: string
+  primaryColor?: string; secondaryColor?: string
   avgsMap: Record<string, EntityAverage>
   phase: ReturnType<typeof getMatchPhase>['phase']
   onOpen: (t: VotingTarget) => void
@@ -1005,14 +1008,26 @@ function SubsList({ players, matchId, avgsMap, phase, onOpen }: {
     <div style={{ marginTop: 12 }}>
       <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.12em', color: C.text3, marginBottom: 8, paddingLeft: 4 }}>SUPLENTES</div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-        {subs.map(p => <SubRow key={p.id} player={p} matchId={matchId} avgData={avgsMap[p.id]} phase={phase} onOpen={onOpen} />)}
+        {subs.map(p => (
+  <SubRow
+    key={p.id}
+    player={p}
+    matchId={matchId}
+    primaryColor={primaryColor}
+    secondaryColor={secondaryColor}
+    avgData={avgsMap[p.id]}
+    phase={phase}
+    onOpen={onOpen}
+  />
+))}
       </div>
     </div>
   )
 }
 
-function SubRow({ player, matchId, avgData, phase, onOpen }: {
+function SubRow({ player, matchId, primaryColor, secondaryColor, avgData, phase, onOpen }: {
   player: ProcessedPlayer; matchId: string
+  primaryColor?: string; secondaryColor?: string
   avgData: EntityAverage | undefined
   phase: ReturnType<typeof getMatchPhase>['phase']
   onOpen: (t: VotingTarget) => void
@@ -1042,8 +1057,18 @@ function SubRow({ player, matchId, avgData, phase, onOpen }: {
           eligible:   player.eligibleForVoting,
         })
       }}
-      style={{ width: '100%', background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.045)', borderRadius: 8, padding: '0 13px', height: 38 , display: 'flex', alignItems: 'center', gap: 9, cursor: player.eligibleForVoting ? 'pointer' : 'default', textAlign: 'left', transition: 'background 120ms' }}>
-      <div style={{ width: 26, height: 26, borderRadius: '50%', background: C.s2, border: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, color: C.text2, flexShrink: 0 }}>
+      style={{ width: '100%', background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.045)', borderRadius: 8, padding: '0 13px', height: 44 , display: 'flex', alignItems: 'center', gap: 9, cursor: player.eligibleForVoting ? 'pointer' : 'default', textAlign: 'left', transition: 'background 120ms' }}>
+      <div style={{
+        width: 32, height: 32, borderRadius: '50%',
+        background: myVote !== null ? (primaryColor ?? 'rgba(26,26,34,0.92)') : 'rgba(38,38,46,0.92)',
+        border: myVote !== null ? `2.5px solid ${secondaryColor ?? 'rgba(255,255,255,0.22)'}` : '2.5px solid rgba(255,255,255,0.22)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        fontSize: 25, fontWeight: 1, fontFamily: 'T90Numbers, sans-serif',
+        color: myVote !== null ? (secondaryColor ?? C.text) : 'rgba(255,255,255,0.45)',
+        position: 'relative', flexShrink: 0,
+        backdropFilter: 'blur(4px)',
+        boxShadow: myVote !== null ? `0 0 0 1.5px ${primaryColor ?? '#000'}` : '0 0 0 1.5px rgba(255,255,255,0.08)',
+      }}>
         {player.number}
       </div>
       <div style={{ flex: 1, minWidth: 0 }}>
@@ -1085,7 +1110,7 @@ function RefereeRow({ matchId, referee, avgData, phase, onOpen }: {
           position:   'Árbitro principal',
           eligible:   true,
         })}
-        style={{ width: '100%', background: C.s1, border: `1px solid ${C.border}`, borderRadius: 12, padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 12, cursor: 'pointer', textAlign: 'left' }}>
+        style={{ width: '100%', background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.045)', borderRadius: 8, padding: '0 13px', height: 44, display: 'flex', alignItems: 'center', gap: 9, cursor: 'pointer', textAlign: 'left', transition: 'background 120ms' }}>
         <div style={{ flex: 1 }}>
           <div style={{ fontSize: 13, fontWeight: 600, color: C.text }}>{referee.name}</div>
         </div>
