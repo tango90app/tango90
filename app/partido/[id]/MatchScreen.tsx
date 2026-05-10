@@ -43,7 +43,7 @@ function getDisplayScore(
 function ratingBg(score: number): string {
   if (score < 4) return '#B91D34'       // rojo
   if (score < 7) return '#F39C12'       // amarillo
-  if (score < 9) return '#1DB954'       // verde
+  if (score < 10) return '#1DB954'       // verde
   return '#FBD005'                      // dorado
 }
 function ratingLabel(score: number): string { return score.toFixed(2) }
