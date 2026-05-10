@@ -714,15 +714,14 @@ primaryColor?: string; secondaryColor?: string
     byLine[getLine(p.position)].push(p)
   }
 
-  // Ordenar por columna real del grid API-Football
-  for (const line of Object.keys(byLine) as PitchLine[]) {
-    byLine[line].sort((a, b) => {
-      const aCol = Number(a.grid?.split(':')[1] ?? 0)
-      const bCol = Number(b.grid?.split(':')[1] ?? 0)
-
-      return aCol - bCol
-    })
-  }
+    // Orden horizontal:
+    // - local: dejar el orden original que ya venía bien
+    // - visitante: invertir solo el eje horizontal
+    for (const line of Object.keys(byLine) as PitchLine[]) {
+      if (!isHome) {
+        byLine[line].reverse()
+      }
+    }
 
   return (
     // FIX 2/3: overflow visible so chip labels render outside circle bounds
@@ -821,6 +820,7 @@ primaryColor?: string; secondaryColor?: string
         if (!linePlayers.length) return null
         const xs = chipXPositions(linePlayers.length)
         const y  = lineY[line]
+
         return linePlayers.map((p, i) => (
           <PlayerChip
             key={p.id}
@@ -851,9 +851,13 @@ function PlayerChip({ player, matchId, cx, cy, primaryColor, secondaryColor, avg
   // myVote desde localStorage para feedback inmediato post-voto,
   // antes de que el servidor responda con avgData actualizado.
   const entityId = `${matchId}_${player.id}`
-  const [localVote, setLocalVote] = useState<number | null>(() => readVote(entityId))
+  const [localVote, setLocalVote] = useState<number | null>(null)
+
   useEffect(() => {
     const refresh = () => setLocalVote(readVote(entityId))
+
+    refresh()
+
     window.addEventListener('tango90:vote-saved', refresh)
     return () => window.removeEventListener('tango90:vote-saved', refresh)
   }, [entityId])

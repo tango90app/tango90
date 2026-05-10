@@ -1,7 +1,9 @@
 {
   "/page": "app/page.js",
   "/terminos/page": "app/terminos/page.js",
+  "/api/votes/summary/route": "app/api/votes/summary/route.js",
   "/partido/[id]/page": "app/partido/[id]/page.js",
+  "/api/votes/route": "app/api/votes/route.js",
   "/api/votes/progress/route": "app/api/votes/progress/route.js",
   "/api/votes/match-averages/route": "app/api/votes/match-averages/route.js"
 }
