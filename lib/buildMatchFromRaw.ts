@@ -77,6 +77,67 @@ const playerId = (id: number) => `api-${id}`
 const coachId  = (id: number) => `api-coach-${id}`
 const refId    = (fixtureId: number) => `api-ref-${fixtureId}`
 
+function normalizePlayerName(name: string | null | undefined): string {
+  return (name ?? '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/\./g, '')
+    .replace(/[^a-z0-9\s]/g, '')
+    .trim()
+    .replace(/\s+/g, ' ')
+}
+
+function getLineupEntries(lineup: AFLineupResponse): AFPlayerEntry[] {
+  return [...lineup.startXI, ...lineup.substitutes]
+}
+
+function resolvePlayerIdFromLineup(
+  rawId: number | null,
+  rawName: string | null,
+  lineup: AFLineupResponse,
+): string | null {
+  const entries = getLineupEntries(lineup)
+
+  // 1. Si el ID del evento existe en el lineup, usarlo.
+  if (rawId && entries.some(e => e.player.id === rawId)) {
+    return playerId(rawId)
+  }
+
+  const eventName = normalizePlayerName(rawName)
+
+  if (eventName) {
+    // 2. Match exacto por nombre normalizado.
+    const exact = entries.find(e => normalizePlayerName(e.player.name) === eventName)
+    if (exact) return playerId(exact.player.id)
+
+    // 3. Match por inicial + apellido.
+    // Ej: "J. Bisanz" debe matchear con "Juan Bisanz".
+    const eventParts = eventName.split(' ')
+    const eventFirstInitial = eventParts[0]?.[0]
+    const eventLastName = eventParts[eventParts.length - 1]
+
+    const byInitialAndLastName = entries.find(e => {
+      const lineupName = normalizePlayerName(e.player.name)
+      const lineupParts = lineupName.split(' ')
+      const lineupFirstInitial = lineupParts[0]?.[0]
+      const lineupLastName = lineupParts[lineupParts.length - 1]
+
+      return (
+        eventFirstInitial &&
+        eventLastName &&
+        lineupFirstInitial === eventFirstInitial &&
+        lineupLastName === eventLastName
+      )
+    })
+
+    if (byInitialAndLastName) return playerId(byInitialAndLastName.player.id)
+  }
+
+  // 4. Fallback: mantener ID crudo si no hubo forma de resolverlo.
+  return rawId ? playerId(rawId) : null
+}
+
 // ── Duración nominal del partido ──────────────────────────────────────────
 // FT → 90, AET / PEN → 120. No se usa elapsed ni stoppage time.
 
@@ -194,7 +255,12 @@ function buildPlayers(lineup: AFLineupResponse, duration: 90 | 120): Player[] {
 
 // ── Eventos ───────────────────────────────────────────────────────────────
 
-function buildEvents(afEvents: AFEventResponse[], homeTeamId: number): MatchEvent[] {
+function buildEvents(
+  afEvents: AFEventResponse[],
+  homeTeamId: number,
+  homeLineup: AFLineupResponse,
+  awayLineup: AFLineupResponse,
+): MatchEvent[] {
   const events: MatchEvent[] = []
 
   for (const ev of afEvents) {
@@ -232,16 +298,19 @@ function buildEvents(afEvents: AFEventResponse[], homeTeamId: number): MatchEven
         events.push({ type: 'red_card', playerId: playerId(pid), minute, period, minuteInPeriod, team, isDoubleYellow: true } as MatchEvent)
       }
 
-    } else if (ev.type === 'subst') {
+        } else if (ev.type === 'subst') {
       // API-Football: player = sale, assist = entra
-      const outId = ev.player.id
-      const inId  = ev.assist.id
-      if (!outId || !inId) continue
+      const lineup = team === 'home' ? homeLineup : awayLineup
+
+      const outPlayerId = resolvePlayerIdFromLineup(ev.player.id, ev.player.name, lineup)
+      const inPlayerId  = resolvePlayerIdFromLineup(ev.assist.id, ev.assist.name, lineup)
+
+      if (!outPlayerId || !inPlayerId) continue
 
       events.push({
         type:        'substitution',
-        playerOutId: playerId(outId),
-        playerInId:  playerId(inId),
+        playerOutId: outPlayerId,
+        playerInId:  inPlayerId,
         minute,
         period,
         minuteInPeriod,
@@ -367,7 +436,7 @@ export function buildMatchFromRaw(row: RawFixtureRow): Match {
     away:       awayTeam,
     referee:    { id: refId(fx.id), name: parseRefereeName(fx.referee) },
     rules:      defaultRules(),
-    events:     buildEvents(afEvents, teams.home.id),
+    events:     buildEvents(afEvents, teams.home.id, homeLineup, awayLineup),
     ...(match_end_at ? { match_end_at } : {}),
     // periods: omitido — API-Football no provee endMinute por período.
     // processMatch funciona sin periods (usa 90/120 como matchEnd nominal).
