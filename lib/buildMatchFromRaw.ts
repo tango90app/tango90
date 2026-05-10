@@ -176,6 +176,7 @@ function buildPlayers(lineup: AFLineupResponse, duration: 90 | 120): Player[] {
     position:      mapPosition(e.player.pos),
     minutesPlayed: duration,   // nominal: si fue suplido, processMatch lo ajusta
     starter:       true,
+    grid:          e.player.grid ?? undefined,
   }))
 
   const subs = lineup.substitutes.map(e => ({
@@ -185,6 +186,7 @@ function buildPlayers(lineup: AFLineupResponse, duration: 90 | 120): Player[] {
     position:      mapPosition(e.player.pos),
     minutesPlayed: 0,          // nominal: processMatch calcula desde el evento subst
     starter:       false,
+    grid:          e.player.grid ?? undefined,
   }))
 
   return [...starters, ...subs]

@@ -41,9 +41,9 @@ function getDisplayScore(
 
 // ── Rating helpers ────────────────────────────────────────────────────────
 function ratingBg(score: number): string {
-  if (score <= 3) return '#B91D34'      // rojo
-  if (score <= 6) return '#F39C12'      // amarillo
-  if (score <= 9) return '#1DB954'      // verde
+  if (score < 4) return '#B91D34'       // rojo
+  if (score < 7) return '#F39C12'       // amarillo
+  if (score < 9) return '#1DB954'       // verde
   return '#FBD005'                      // dorado
 }
 function ratingLabel(score: number): string { return score.toFixed(2) }
@@ -395,11 +395,27 @@ export default function MatchScreen({ match, processed }: Props) {
           {(['home', 'away'] as const).map(side => {
             const t = side === 'home' ? processed.home : processed.away
             const teamAvg = side === 'home' ? (averages?.homeTeamAvg ?? null) : (averages?.awayTeamAvg ?? null)
+
+            const eligiblePlayers = t.players.filter(p => p.eligibleForVoting)
+            const myVotes = eligiblePlayers
+              .map(p => ({
+                vote: averages?.byTarget?.[p.id]?.myVote ?? null,
+                weight: p.impactMinutes,
+              }))
+              .filter(v => v.vote !== null && v.weight > 0)
+
+            const myTeamAvg =
+              myVotes.length === eligiblePlayers.length
+                ? myVotes.reduce((sum, v) => sum + (v.vote as number) * v.weight, 0) /
+                  myVotes.reduce((sum, v) => sum + v.weight, 0)
+                : null
+
             return (
               <TeamTab
                 key={side}
                 team={t}
                 isActive={activeTeam === side}
+                myTeamAvg={myTeamAvg}
                 teamAvg={teamAvg}
                 onClick={() => handleTabClick(side)}
               />
@@ -618,8 +634,12 @@ function EventBlock({ icon, homeEvents, awayEvents, nameById }: {
 }
 
 // ── FIX 5: Team Tab — badge slot ready for flag asset ─────────────────────
-function TeamTab({ team, isActive, teamAvg, onClick }: {
-  team: ProcessedMatch['home']; isActive: boolean; teamAvg: number | null; onClick: () => void
+function TeamTab({ team, isActive, myTeamAvg, teamAvg, onClick }: {
+  team: ProcessedMatch['home']
+  isActive: boolean
+  myTeamAvg: number | null
+  teamAvg: number | null
+  onClick: () => void
 }) {
   return (
     <button
@@ -656,8 +676,14 @@ function TeamTab({ team, isActive, teamAvg, onClick }: {
   team.badge
 )}
       </span>
+      {myTeamAvg !== null && (
+        <span style={{ fontSize: 11, fontWeight: 700, color: '#fff', background: ratingBg(myTeamAvg), padding: '1px 7px', borderRadius: 6 }}>
+          {ratingLabel(myTeamAvg)}
+        </span>
+      )}
+
       {teamAvg !== null && (
-        <span style={{ fontSize: 11, fontWeight: 700, color: '#fff', background: ratingBg(teamAvg), padding: '1px 7px', borderRadius: 6 }}>
+        <span style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.55)' }}>
           {ratingLabel(teamAvg)}
         </span>
       )}
@@ -677,8 +703,26 @@ primaryColor?: string; secondaryColor?: string
   const lineY = isHome ? LINE_Y_HOME : LINE_Y_AWAY
   const lines: PitchLine[] = isHome ? ['ARQ','DEF','MID','FWD'] : ['FWD','MID','DEF','ARQ']
 
-  const byLine: Record<PitchLine, ProcessedPlayer[]> = { ARQ: [], DEF: [], MID: [], FWD: [] }
-  for (const p of starters) byLine[getLine(p.position)].push(p)
+  const byLine: Record<PitchLine, ProcessedPlayer[]> = {
+  ARQ: [],
+  DEF: [],
+  MID: [],
+  FWD: [],
+  }
+
+  for (const p of starters) {
+    byLine[getLine(p.position)].push(p)
+  }
+
+  // Ordenar por columna real del grid API-Football
+  for (const line of Object.keys(byLine) as PitchLine[]) {
+    byLine[line].sort((a, b) => {
+      const aCol = Number(a.grid?.split(':')[1] ?? 0)
+      const bCol = Number(b.grid?.split(':')[1] ?? 0)
+
+      return aCol - bCol
+    })
+  }
 
   return (
     // FIX 2/3: overflow visible so chip labels render outside circle bounds
@@ -820,6 +864,11 @@ function PlayerChip({ player, matchId, cx, cy, primaryColor, secondaryColor, avg
   const serverAvg = avgData?.avg ?? null
   const displayScore = getDisplayScore(phase, myVote, serverAvg)
   const hasVoted     = myVote !== null
+
+  const showAvg =
+    phase === 'voting_open_blind'
+      ? hasVoted && serverAvg !== null
+      : serverAvg !== null
   const wasSubbedOut = player.status === 'starter_subbed_out' || player.status === 'sub_entered_subbed_out'
   const wasRedCarded = player.status === 'starter_red_card'   || player.status === 'sub_entered_red_card'
 
@@ -932,14 +981,14 @@ function PlayerChip({ player, matchId, cx, cy, primaryColor, secondaryColor, avg
   <span style={{
     fontSize: 10,
     fontWeight: 600,
-    color: serverAvg !== null ? 'rgba(255,255,255,0.55)' : 'rgba(255,255,255,0.28)',
+    color: showAvg ? 'rgba(255,255,255,0.55)' : 'rgba(255,255,255,0.28)',
     lineHeight: 1,
     textShadow: '0 1px 4px rgba(0,0,0,0.95), 0 0 8px rgba(0,0,0,0.8)',
   }}>
-    {typeof window !== 'undefined' && serverAvg !== null
-  ? ratingLabel(serverAvg)
-  : ''
-}
+    {typeof window !== 'undefined' && showAvg
+      ? ratingLabel(serverAvg!)
+      : ''
+    }
   </span>
 </div>
     </button>
@@ -1002,7 +1051,9 @@ function SubsList({ players, matchId, primaryColor, secondaryColor, avgsMap, pha
   phase: ReturnType<typeof getMatchPhase>['phase']
   onOpen: (t: VotingTarget) => void
 }) {
-  const subs = players.filter(p => !p.starter && p.minuteIn !== null)
+  const subs = players
+    .filter(p => !p.starter && p.minuteIn !== null)
+    .sort((a, b) => (a.minuteIn ?? 999) - (b.minuteIn ?? 999))
   if (!subs.length) return null
   return (
     <div style={{ marginTop: 12 }}>
@@ -1142,7 +1193,7 @@ function RowScoreDisplay({ myVote, serverAvg: rawServerAvg, phase, eligible, cta
 
   // Si el servidor aún no devolvió avg pero el usuario ya votó,
   // usamos myVote como fallback (avg de 1 solo voto = ese voto).
-  const serverAvg = rawServerAvg ?? (myVote !== null ? myVote : null)
+  const serverAvg = rawServerAvg
   // En modo ciego: avg visible solo si el usuario ya votó esa entidad
   const showAvg =
   phase === 'voting_open_blind'
@@ -1172,9 +1223,9 @@ function RowScoreDisplay({ myVote, serverAvg: rawServerAvg, phase, eligible, cta
         <div style={{ minWidth: 30, height: 22, borderRadius: 7, background: ratingBg(myVote!), display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 5px' }}>
           <span style={{ fontSize: 11, fontWeight: 800, color: '#fff', lineHeight: 1 }}>{String(myVote!)}</span>
         </div>
-      ) : showAvg ? (
+      ) : eligible ? (
         <div style={{ minWidth: 30, height: 22, borderRadius: 7, background: C.s2, border: `1px solid ${C.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 5px' }}>
-          <span style={{ fontSize: 11, fontWeight: 700, color: C.text2, lineHeight: 1 }}>{ratingLabel(serverAvg!)}</span>
+          <span style={{ fontSize: 11, fontWeight: 700, color: C.text2, lineHeight: 1 }}>-</span>
         </div>
       ) : null}
     </div>

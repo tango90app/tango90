@@ -51,6 +51,9 @@ export type Player = {
   position: Position
   minutesPlayed: number   // campo manual legacy — NO eliminar, convive con derivedMinutesPlayed
   starter: boolean        // true = titular de inicio, false = en el banco
+
+  // API-Football lineup grid, ej: "2:3"
+  grid?: string
 }
 
 export type Team = {

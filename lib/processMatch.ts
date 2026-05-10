@@ -64,6 +64,9 @@ export type ProcessedPlayer = {
   //   expulsado         → impactMinutes = desde ingreso hasta FIN del partido (el slot queda vacío)
   //   no ingresó        → impactMinutes = 0
   impactMinutes: number
+
+// API-Football lineup grid, ej: "2:3"
+grid?: string
 }
 
 export type SubstitutionWindow = {
@@ -501,8 +504,9 @@ export function processMatch(match: Match): ProcessedMatch {
       redCard: s.redCard,
       inconsistencies,
       impactMinutes,
+      grid: p.grid,
+      }
     }
-  }
 
   // Paso 6: construir ventanas de sustitución
   function buildWindows(subs: SubEntry[]): SubstitutionWindow[] {
