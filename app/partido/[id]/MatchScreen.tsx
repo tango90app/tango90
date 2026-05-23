@@ -1047,91 +1047,70 @@ function PlayerChip({ player, matchId, cx, cy, primaryColor, secondaryColor, avg
         boxShadow: hasVoted ? `0 0 0 1.5px ${primaryColor ?? '#000'}` : '0 0 0 1.5px rgba(255,255,255,0.08)',
       }}>
         {player.number}
-        {wasSubbedOut && (
-  <span style={{
-    position: 'absolute',
-    bottom: -12,
-    right: -14,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    height: 15,
-    padding: '1px 5px',
-    borderRadius: 999,
-    background: 'rgba(11,11,15,0.78)',
-    border: '1px solid rgba(255,255,255,0.10)',
-    color: 'rgba(255,255,255,0.66)',
-    fontSize: 9,
-    fontWeight: 700,
-    lineHeight: 1,
-    letterSpacing: '0.01em',
-    whiteSpace: 'nowrap',
-    boxShadow: '0 2px 8px rgba(0,0,0,0.28)',
-    backdropFilter: 'blur(4px)',
-  }}>
-    ↓ {player.minuteOutDisplay ?? `${player.minuteOut}'`}
-  </span>
-)}
-        {wasRedCarded && (
-  <span style={{
-    position: 'absolute',
-    bottom: -12,
-    right: -14,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    height: 15,
-    padding: '1px 5px',
-    borderRadius: 999,
-    background: 'rgba(11,11,15,0.78)',
-    border: '1px solid rgba(255,255,255,0.10)',
-    color: 'rgba(255,255,255,0.72)',
-    fontSize: 9,
-    fontWeight: 700,
-    lineHeight: 1,
-    whiteSpace: 'nowrap',
-    boxShadow: '0 2px 8px rgba(0,0,0,0.28)',
-    backdropFilter: 'blur(4px)',
-  }}>
-    🟥
-  </span>
-)}
-        {player.goals > 0 && (
-  <span style={{
-    position: 'absolute',
-    top: -12,
-    right: -14,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    height: 15,
-    padding: '1px 5px',
-    borderRadius: 999,
-    background: 'rgba(11,11,15,0.78)',
-    border: '1px solid rgba(255,255,255,0.10)',
-    color: 'rgba(255,255,255,0.82)',
-    fontSize: 9,
-    fontWeight: 700,
-    lineHeight: 1,
-    whiteSpace: 'nowrap',
-    boxShadow: '0 2px 8px rgba(0,0,0,0.28)',
-    backdropFilter: 'blur(4px)',
-  }}>
-    {player.goals > 1 ? `⚽ ×${player.goals}` : '⚽'}
-  </span>
-)}
+        
       </div>
 
       {/* FIX 2: Name — always rendered, below the circle */}
       <span style={{
-        marginTop: 6, fontSize: 10, fontWeight: 600, color: C.text,
-        textAlign: 'center', width: '100%',
-        overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-        textShadow: '0 1px 4px rgba(0,0,0,0.95), 0 0 8px rgba(0,0,0,0.8)',
-        lineHeight: '12px', display: 'block',
+  marginTop: 6,
+  fontSize: 10,
+  fontWeight: 600,
+  color: C.text,
+  textAlign: 'center',
+  width: '100%',
+  overflow: 'visible',
+  whiteSpace: 'nowrap',
+  textShadow: '0 1px 4px rgba(0,0,0,0.95), 0 0 8px rgba(0,0,0,0.8)',
+  lineHeight: '12px',
+  display: 'block',
+}}>
+  <span style={{ position: 'relative', display: 'inline-block', maxWidth: 66 }}>
+    <span style={{
+      display: 'inline-block',
+      maxWidth: 66,
+      overflow: 'hidden',
+      textOverflow: 'ellipsis',
+      whiteSpace: 'nowrap',
+      verticalAlign: 'bottom',
+    }}>
+      {formatPlayerShortName(player.name)}
+    </span>
+
+    {(player.goals > 0 || wasRedCarded || wasSubbedOut) && (
+      <span style={{
+        position: 'absolute',
+        left: '100%',
+        top: 1,
+        marginLeft: 4,
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: 3,
+        fontSize: 8,
+        fontWeight: 700,
+        color: 'rgba(255,255,255,0.56)',
+        lineHeight: 1,
+        whiteSpace: 'nowrap',
+        pointerEvents: 'none',
       }}>
-        {formatPlayerShortName(player.name)}
+        {player.goals > 0 && (
+          <span style={{ color: 'rgba(255,255,255,0.68)' }}>
+            {player.goals > 1 ? `⚽×${player.goals}` : '⚽'}
+          </span>
+        )}
+
+        {wasRedCarded && (
+          <span style={{ color: 'rgba(239,68,68,0.82)' }}>■</span>
+        )}
+
+        {wasSubbedOut && (
+          <span style={{ color: 'rgba(255,255,255,0.50)' }}>
+            ↘ {player.minuteOutDisplay ?? `${player.minuteOut}'`}
+          </span>
+        )}
       </span>
+    )}
+  </span>
+</span>
 
             {/* My vote — primary */}
 <div style={{
