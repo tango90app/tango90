@@ -1048,20 +1048,78 @@ function PlayerChip({ player, matchId, cx, cy, primaryColor, secondaryColor, avg
       }}>
         {player.number}
         {wasSubbedOut && (
-          <span style={{ position: 'absolute', bottom: -7, right: -6, fontSize: 8, fontWeight: 700, color: '#EF4444', background: 'rgba(11,11,15,0.9)', borderRadius: 3, padding: '0 2px', lineHeight: '14px' }}>
-            ↓{player.minuteOutDisplay ?? `${player.minuteOut}'`}
-          </span>
-        )}
+  <span style={{
+    position: 'absolute',
+    bottom: -12,
+    right: -14,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: 15,
+    padding: '1px 5px',
+    borderRadius: 999,
+    background: 'rgba(11,11,15,0.78)',
+    border: '1px solid rgba(255,255,255,0.10)',
+    color: 'rgba(255,255,255,0.66)',
+    fontSize: 9,
+    fontWeight: 700,
+    lineHeight: 1,
+    letterSpacing: '0.01em',
+    whiteSpace: 'nowrap',
+    boxShadow: '0 2px 8px rgba(0,0,0,0.28)',
+    backdropFilter: 'blur(4px)',
+  }}>
+    ↓ {player.minuteOutDisplay ?? `${player.minuteOut}'`}
+  </span>
+)}
         {wasRedCarded && (
-          <span style={{ position: 'absolute', bottom: -7, right: -6, fontSize: 8, background: 'rgba(11,11,15,0.9)', borderRadius: 3, padding: '0 2px', lineHeight: '14px' }}>
-            🟥
-          </span>
-        )}
+  <span style={{
+    position: 'absolute',
+    bottom: -12,
+    right: -14,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: 15,
+    padding: '1px 5px',
+    borderRadius: 999,
+    background: 'rgba(11,11,15,0.78)',
+    border: '1px solid rgba(255,255,255,0.10)',
+    color: 'rgba(255,255,255,0.72)',
+    fontSize: 9,
+    fontWeight: 700,
+    lineHeight: 1,
+    whiteSpace: 'nowrap',
+    boxShadow: '0 2px 8px rgba(0,0,0,0.28)',
+    backdropFilter: 'blur(4px)',
+  }}>
+    🟥
+  </span>
+)}
         {player.goals > 0 && (
-          <span style={{ position: 'absolute', top: -7, right: -8, fontSize: 8, background: 'rgba(11,11,15,0.9)', borderRadius: 3, padding: '0 2px', lineHeight: '14px' }}>
-            {player.goals > 1 ? `⚽×${player.goals}` : '⚽'}
-          </span>
-        )}
+  <span style={{
+    position: 'absolute',
+    top: -12,
+    right: -14,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: 15,
+    padding: '1px 5px',
+    borderRadius: 999,
+    background: 'rgba(11,11,15,0.78)',
+    border: '1px solid rgba(255,255,255,0.10)',
+    color: 'rgba(255,255,255,0.82)',
+    fontSize: 9,
+    fontWeight: 700,
+    lineHeight: 1,
+    whiteSpace: 'nowrap',
+    boxShadow: '0 2px 8px rgba(0,0,0,0.28)',
+    backdropFilter: 'blur(4px)',
+  }}>
+    {player.goals > 1 ? `⚽ ×${player.goals}` : '⚽'}
+  </span>
+)}
       </div>
 
       {/* FIX 2: Name — always rendered, below the circle */}
