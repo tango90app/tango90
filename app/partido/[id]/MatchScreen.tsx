@@ -1004,6 +1004,7 @@ function PlayerChip({ player, matchId, cx, cy, primaryColor, secondaryColor, avg
       : serverAvg !== null
   const wasSubbedOut = player.status === 'starter_subbed_out' || player.status === 'sub_entered_subbed_out'
   const wasRedCarded = player.status === 'starter_red_card'   || player.status === 'sub_entered_red_card'
+  const hasEvents = player.goals > 0 || wasRedCarded || wasSubbedOut
 
   // Position: anchor on the circle centre (cx, cy). Button top = cy - CHIP_ABOVE
   // No height set → button is as tall as its content → name/pill always render
@@ -1046,71 +1047,46 @@ function PlayerChip({ player, matchId, cx, cy, primaryColor, secondaryColor, avg
         backdropFilter: 'blur(4px)',
         boxShadow: hasVoted ? `0 0 0 1.5px ${primaryColor ?? '#000'}` : '0 0 0 1.5px rgba(255,255,255,0.08)',
       }}>
-        {player.number}
+        <span style={{ lineHeight: 1 }}>
+{player.number}
+  {wasRedCarded && (
+    <span style={{
+      position: 'absolute',
+      right: -10,
+      top: '50%',
+      transform: 'translateY(-50%)',
+      width: 16,
+      height: 20,
+      backgroundImage: 'url(/logos/objects/red_card.svg)',
+      backgroundSize: 'contain',
+      backgroundRepeat: 'no-repeat',
+      backgroundPosition: 'center',
+      filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.65))',
+      pointerEvents: 'none',
+    }} />
+  )}  
+</span>
         
       </div>
 
       {/* FIX 2: Name — always rendered, below the circle */}
-      <span style={{
+<span style={{
   marginTop: 6,
   fontSize: 10,
   fontWeight: 600,
   color: C.text,
   textAlign: 'center',
   width: '100%',
-  overflow: 'visible',
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
   whiteSpace: 'nowrap',
   textShadow: '0 1px 4px rgba(0,0,0,0.95), 0 0 8px rgba(0,0,0,0.8)',
   lineHeight: '12px',
   display: 'block',
 }}>
-  <span style={{ position: 'relative', display: 'inline-block', maxWidth: 66 }}>
-    <span style={{
-      display: 'inline-block',
-      maxWidth: 66,
-      overflow: 'hidden',
-      textOverflow: 'ellipsis',
-      whiteSpace: 'nowrap',
-      verticalAlign: 'bottom',
-    }}>
-      {formatPlayerShortName(player.name)}
-    </span>
-
-    {(player.goals > 0 || wasRedCarded || wasSubbedOut) && (
-      <span style={{
-        position: 'absolute',
-        left: '100%',
-        top: 1,
-        marginLeft: 4,
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: 3,
-        fontSize: 8,
-        fontWeight: 700,
-        color: 'rgba(255,255,255,0.56)',
-        lineHeight: 1,
-        whiteSpace: 'nowrap',
-        pointerEvents: 'none',
-      }}>
-        {player.goals > 0 && (
-          <span style={{ color: 'rgba(255,255,255,0.68)' }}>
-            {player.goals > 1 ? `⚽×${player.goals}` : '⚽'}
-          </span>
-        )}
-
-        {wasRedCarded && (
-          <span style={{ color: 'rgba(239,68,68,0.82)' }}>■</span>
-        )}
-
-        {wasSubbedOut && (
-          <span style={{ color: 'rgba(255,255,255,0.50)' }}>
-            ↘ {player.minuteOutDisplay ?? `${player.minuteOut}'`}
-          </span>
-        )}
-      </span>
-    )}
-  </span>
+  {formatPlayerShortName(player.name)}
 </span>
+
 
             {/* My vote — primary */}
 <div style={{
