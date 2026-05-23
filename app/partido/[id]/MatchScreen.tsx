@@ -104,6 +104,102 @@ function chipXPositions(count: number): number[] {
   return Array.from({ length: count }, (_, i) => margin + (span / (count - 1)) * i)
 }
 
+function parseGrid(grid?: string) {
+  if (!grid) return null
+
+  const [rowRaw, colRaw] = grid.split(':')
+  const row = Number(rowRaw)
+  const col = Number(colRaw)
+
+  if (!Number.isFinite(row) || !Number.isFinite(col)) return null
+
+  return { row, col }
+}
+
+function getGridX(col: number, maxCol: number) {
+  const center = PITCH_W / 2
+
+  if (maxCol <= 1) return center
+
+  // Líneas de 2 jugadores: doble 5, dupla de delanteros, doble central, etc.
+  // No van a los extremos: quedan cerrados y futboleros.
+  if (maxCol === 2) {
+    const gap = 52
+    return col === 1 ? center - gap : center + gap
+  }
+
+  // Líneas de 3 jugadores: izquierda, centro, derecha, pero no pegados al borde.
+  if (maxCol === 3) {
+    const gap = 95
+    if (col === 1) return center - gap
+    if (col === 2) return center
+    return center + gap
+  }
+
+  // Líneas de 4 o más: usar ancho completo.
+  const sidePadding = 54
+  const usableW = PITCH_W - sidePadding * 2
+  return sidePadding + ((col - 1) / (maxCol - 1)) * usableW
+}
+
+function getGridY(row: number, isHome: boolean) {
+  const top = 72
+  const bottom = PITCH_H - 72
+  const step = (bottom - top) / 4
+
+  const yHome = top + (row - 1) * step
+  return isHome ? yHome : PITCH_H - yHome
+}
+
+function getVisualOffset(player: ProcessedPlayer, row: number, col: number, maxCol: number) {
+  const pos = player.position
+
+  let x = 0
+  let y = 0
+
+  const isWide = maxCol >= 4 && (col === 1 || col === maxCol)
+  const isCenter = maxCol <= 2 || (col > 1 && col < maxCol)
+
+  // Defensa: laterales más adelantados, centrales más bajos
+  if (row === 2) {
+    if (isWide) {
+      // Laterales
+      y += 0
+      x += col === 1 ? -6 : 6
+    } else {
+      // Centrales
+      y -= 20
+      x += col <= maxCol / 2 ? 6 : -6
+    }
+  }
+
+  // Volantes centrales: escalonar levemente
+  if (pos === 'MC') {
+    if (isCenter) y -= 10
+    if (isWide) y += 10
+  }
+
+  // Extremos: abiertos, pero no tan arriba como 9
+  if (pos === 'DEL' && isWide) {
+    y -= 10
+    x += col === 1 ? -8 : 8
+  }
+
+    // Centrodelantero: más adelantado y centrado
+  if (pos === 'CDEL') {
+    y += 18
+    if (maxCol === 2) x += col === 1 ? 10 : -10
+  }
+
+  // Dos delanteros: dupla de ataque, cerrados pero no encima del 9
+  if (row >= 4 && maxCol === 2) {
+    y += 22
+    x += col === 1 ? -34 : 34
+  }
+
+  return { x, y }
+}
+
 function formatPlayerShortName(fullName: string): string {
   const parts = fullName.trim().split(/\s+/)
   if (parts.length === 0) return ''
@@ -816,26 +912,59 @@ primaryColor?: string; secondaryColor?: string
 
       {/* Player chips — rendered OUTSIDE the overflow:hidden pitch background */}
       {lines.map(line => {
-        const linePlayers = byLine[line]
-        if (!linePlayers.length) return null
-        const xs = chipXPositions(linePlayers.length)
-        const y  = lineY[line]
+  const linePlayers = byLine[line]
+  if (!linePlayers.length) return null
 
-        return linePlayers.map((p, i) => (
-          <PlayerChip
-            key={p.id}
-            player={p}
-            matchId={matchId}
-            cx={xs[i]}  
-            cy={y}
-            primaryColor={primaryColor}
-            secondaryColor={secondaryColor}
-            avgData={avgsMap[p.id]}
-            phase={phase}
-            onOpen={onOpen}
-          />
-        ))
-      })}
+  const allHaveGrid = linePlayers.every(p => parseGrid(p.grid))
+
+  if (!allHaveGrid) {
+    const xs = chipXPositions(linePlayers.length)
+    const y  = lineY[line]
+
+    return linePlayers.map((p, i) => (
+      <PlayerChip
+        key={p.id}
+        player={p}
+        matchId={matchId}
+        cx={xs[i]}
+        cy={y}
+        primaryColor={primaryColor}
+        secondaryColor={secondaryColor}
+        avgData={avgsMap[p.id]}
+        phase={phase}
+        onOpen={onOpen}
+      />
+    ))
+  }
+
+  return linePlayers.map(p => {
+    const grid = parseGrid(p.grid)!
+    const sameGridRow = starters
+      .map(s => parseGrid(s.grid))
+      .filter(g => g && g.row === grid.row)
+
+    const maxCol = Math.max(...sameGridRow.map(g => g!.col))
+    const visualCol = isHome ? maxCol - grid.col + 1 : grid.col
+    const baseX = getGridX(visualCol, maxCol)
+    const baseY = getGridY(grid.row, isHome)
+    const offset = getVisualOffset(p, grid.row, visualCol, maxCol)
+
+    return (
+      <PlayerChip
+        key={p.id}
+        player={p}
+        matchId={matchId}
+        cx={baseX + offset.x}
+        cy={baseY + (isHome ? offset.y : -offset.y)}
+        primaryColor={primaryColor}
+        secondaryColor={secondaryColor}
+        avgData={avgsMap[p.id]}
+        phase={phase}
+        onOpen={onOpen}
+      />
+    )
+  })
+})}
     </div>
   )
 }
