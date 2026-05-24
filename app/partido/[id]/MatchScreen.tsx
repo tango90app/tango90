@@ -692,10 +692,10 @@ function MatchHeader({ match, processed }: { match: Match; processed: ProcessedM
         </div>
 
         {(homeGoals.length > 0 || awayGoals.length > 0) && (
-          <EventBlock icon="⚽" homeEvents={homeGoals} awayEvents={awayGoals} nameById={nameById} />
+          <EventBlock icon="ball" homeEvents={homeGoals} awayEvents={awayGoals} nameById={nameById} />
         )}
         {(homeReds.length > 0 || awayReds.length > 0) && (
-          <EventBlock icon="🟥" homeEvents={homeReds} awayEvents={awayReds} nameById={nameById} />
+          <EventBlock icon="red_card" homeEvents={homeReds} awayEvents={awayReds} nameById={nameById} />
         )}
       </div>
     </div>
@@ -703,7 +703,10 @@ function MatchHeader({ match, processed }: { match: Match; processed: ProcessedM
 }
 
 function EventBlock({ icon, homeEvents, awayEvents, nameById }: {
-  icon: string; homeEvents: MatchEvent[]; awayEvents: MatchEvent[]; nameById: Map<string, string>
+  icon: 'ball' | 'red_card'
+  homeEvents: MatchEvent[]
+  awayEvents: MatchEvent[]
+  nameById: Map<string, string>
 }) {
   function label(e: MatchEvent): string {
     return (e.type === 'goal' || e.type === 'red_card') ? (nameById.get(e.playerId) ?? '') : ''
@@ -717,7 +720,37 @@ function EventBlock({ icon, homeEvents, awayEvents, nameById }: {
           </span>
         ))}
       </div>
-      <div style={{ width: 40, textAlign: 'center', fontSize: 14, paddingTop: 1, flexShrink: 0 }}>{icon}</div>
+      <div style={{
+  width: 40,
+  display: 'flex',
+  justifyContent: 'center',
+  paddingTop: 1,
+  flexShrink: 0,
+}}>
+  {icon === 'ball' ? (
+    <img
+      src="/logos/objects/tango_ball.svg"
+      alt=""
+      style={{
+        width: 16,
+        height: 16,
+        objectFit: 'contain',
+        display: 'block',
+      }}
+    />
+  ) : (
+    <img
+      src="/logos/objects/red_card.svg"
+      alt=""
+      style={{
+        width: 12,
+        height: 16,
+        objectFit: 'contain',
+        display: 'block',
+      }}
+    />
+  )}
+</div>
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 3 }}>
         {awayEvents.map((e, i) => (
           <span key={i} style={{ fontSize: 11, color: C.text2 }}>
@@ -1050,11 +1083,29 @@ function PlayerChip({ player, matchId, cx, cy, primaryColor, secondaryColor, avg
         <span style={{ lineHeight: 1 }}>
 {player.number}
   {player.goals > 0 && (
+  <span style={{
+    position: 'absolute',
+    left: -10,
+    top: '50%',
+    transform: 'translateY(-50%)',
+    display: 'flex',
+    alignItems: 'center',
+    gap: 2,
+    pointerEvents: 'none',
+  }}>
+    {player.goals > 1 && (
+      <span style={{
+        fontSize: 7,
+        fontWeight: 800,
+        color: 'rgba(255,255,255,0.86)',
+        lineHeight: 1,
+        textShadow: '0 1px 3px rgba(0,0,0,0.8)',
+      }}>
+        ×{player.goals}
+      </span>
+    )}
+
     <span style={{
-      position: 'absolute',
-      left: -12,
-      top: '50%',
-      transform: 'translateY(-50%)',
       width: 20,
       height: 20,
       backgroundImage: 'url(/logos/objects/tango_ball.svg)',
@@ -1062,11 +1113,12 @@ function PlayerChip({ player, matchId, cx, cy, primaryColor, secondaryColor, avg
       backgroundRepeat: 'no-repeat',
       backgroundPosition: 'center',
       filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.65))',
-      pointerEvents: 'none',
+      flexShrink: 0,
     }} />
-  )}
+  </span>
+)}
   
-  {wasRedCarded && (
+    {wasRedCarded && (
     <span style={{
       position: 'absolute',
       right: -10,
@@ -1081,7 +1133,26 @@ function PlayerChip({ player, matchId, cx, cy, primaryColor, secondaryColor, avg
       filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.65))',
       pointerEvents: 'none',
     }} />
-  )}  
+  )}
+
+  {wasSubbedOut && (
+    <span style={{
+      position: 'absolute',
+      left: '50%',
+      top: -15,
+      transform: 'translateX(-50%)',
+      fontFamily: 'Plus Jakarta Sans, sans-serif',
+      fontSize: 10,
+      fontWeight: 700,
+      color: C.text3,
+      lineHeight: 1,
+      whiteSpace: 'nowrap',
+      textShadow: '0 1px 3px rgba(0,0,0,0.75)',
+      pointerEvents: 'none',
+    }}>
+      ↓{player.minuteOutDisplay ?? `${player.minuteOut}'`}
+    </span>
+  )}
 </span>
         
       </div>
@@ -1289,8 +1360,70 @@ function SubRow({ player, matchId, primaryColor, secondaryColor, avgData, phase,
         <span style={{ fontSize: 13, fontWeight: 600, color: C.text }}>{player.name}</span>
         <span style={{ fontSize: 11, color: C.text3, marginLeft: 8 }}>↑ {player.minuteInDisplay ?? `${player.minuteIn}'`}</span>
       </div>
-      {player.goals > 0 && <span style={{ fontSize: 11, color: C.text2 }}>{player.goals > 1 ? `⚽ ×${player.goals}` : '⚽'}</span>}
-      <RowScoreDisplay myVote={myVote} serverAvg={avgData?.avg ?? null} phase={phase} eligible={player.eligibleForVoting} />
+
+      <div style={{
+  width: 48,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'flex-end',
+  marginRight: 4,
+  flexShrink: 0,
+}}>
+  {player.goals > 0 && (
+    <div style={{
+      width: 48,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'flex-end',
+      gap: 3,
+    }}>
+      {player.goals > 1 && (
+        <span style={{
+          fontSize: 12,
+          fontWeight: 800,
+          color: 'rgba(255,255,255,0.72)',
+          lineHeight: 1,
+        }}>
+          {player.goals}×
+        </span>
+      )}
+
+      <div style={{
+        width: 20,
+        height: 20,
+        backgroundImage: 'url(/logos/objects/tango_ball.svg)',
+        backgroundSize: '20px 20px',
+        backgroundRepeat: 'no-repeat',
+        backgroundPosition: 'center',
+        filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.55))',
+        flexShrink: 0,
+      }} />
+    </div>
+  )}
+
+  {!player.goals && player.redCard && (
+    <div style={{
+      width: 20,
+      display: 'flex',
+      justifyContent: 'center',
+      flexShrink: 0,
+    }}>
+      <div style={{
+        width: 16,
+        height: 20,
+        backgroundImage: 'url(/logos/objects/red_card.svg)',
+        backgroundSize: 'contain',
+        backgroundRepeat: 'no-repeat',
+        backgroundPosition: 'center',
+        filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.55))',
+      }} />
+    </div>
+  )}
+</div>
+
+      <div style={{ width: 58, display: 'flex', justifyContent: 'flex-end', flexShrink: 0 }}>
+  <RowScoreDisplay myVote={myVote} serverAvg={avgData?.avg ?? null} phase={phase} eligible={player.eligibleForVoting} />
+</div>
     </button>
   )
 }
