@@ -1049,6 +1049,23 @@ function PlayerChip({ player, matchId, cx, cy, primaryColor, secondaryColor, avg
       }}>
         <span style={{ lineHeight: 1 }}>
 {player.number}
+  {player.goals > 0 && (
+    <span style={{
+      position: 'absolute',
+      left: -12,
+      top: '50%',
+      transform: 'translateY(-50%)',
+      width: 20,
+      height: 20,
+      backgroundImage: 'url(/logos/objects/tango_ball.svg)',
+      backgroundSize: '20px 20px',
+      backgroundRepeat: 'no-repeat',
+      backgroundPosition: 'center',
+      filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.65))',
+      pointerEvents: 'none',
+    }} />
+  )}
+  
   {wasRedCarded && (
     <span style={{
       position: 'absolute',
