@@ -334,20 +334,65 @@ const filteredMatches = allMatches.filter(match =>
   getCompetitionKey(match) === activeCompetitionKey
 )
 
+const roundOrder =
+  activeCompetitionKey === 'lpf'
+    ? [
+        'APERTURA · FECHA 1',
+        'APERTURA · FECHA 2',
+        'APERTURA · FECHA 3',
+        'APERTURA · FECHA 4',
+        'APERTURA · FECHA 5',
+        'APERTURA · FECHA 6',
+        'APERTURA · FECHA 7',
+        'APERTURA · FECHA 8',
+        'APERTURA · FECHA 9',
+        'APERTURA · FECHA 10',
+        'APERTURA · FECHA 11',
+        'APERTURA · FECHA 12',
+        'APERTURA · FECHA 13',
+        'APERTURA · FECHA 14',
+        'APERTURA · FECHA 15',
+        'APERTURA · FECHA 16',
+        'APERTURA · 8vos de FINAL',
+        'APERTURA · 4tos de FINAL',
+        'APERTURA · SEMIFINAL',
+        'APERTURA · FINAL',
+      ]
+    : []
+
 const availableRounds = Array.from(
   new Set(
     filteredMatches
       .map(m => normalizeRound(m.round, activeCompetitionKey))
       .filter(Boolean)
   )
-).reverse()
+).sort((a, b) => {
+  const ai = roundOrder.indexOf(a)
+  const bi = roundOrder.indexOf(b)
 
-const activeRound = 'APERTURA · 8vos de FINAL'
+  if (ai === -1 && bi === -1) return a.localeCompare(b)
+  if (ai === -1) return 1
+  if (bi === -1) return -1
+
+  return ai - bi
+})
+
+const activeRound =
+  typeof searchParams?.round === 'string'
+    ? decodeURIComponent(searchParams.round)
+    : availableRounds[availableRounds.length - 1]
 
 const activeRoundIndex = availableRounds.indexOf(activeRound)
 
-const previousRound = null
-const nextRound = null
+const previousRound =
+  activeRoundIndex > 0
+    ? availableRounds[activeRoundIndex - 1]
+    : null
+
+const nextRound =
+  activeRoundIndex >= 0 && activeRoundIndex < availableRounds.length - 1
+    ? availableRounds[activeRoundIndex + 1]
+    : null
 
 const roundMatches = activeRound
   ? filteredMatches.filter(m => normalizeRound(m.round, activeCompetitionKey) === activeRound)

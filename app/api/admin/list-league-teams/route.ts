@@ -52,6 +52,7 @@ export async function GET(req: NextRequest) {
       )
     }
     raw = await res.json()
+    console.log(JSON.stringify(raw, null, 2))
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err)
     return NextResponse.json({ error: 'Error al consultar API-Football', detail: msg }, { status: 502 })
