@@ -90,6 +90,10 @@ export async function GET(req: NextRequest) {
   for (const team of NATIONAL_TEAMS) {
     const search = SEARCH_NAMES_BY_TEAM_KEY[team.teamKey] ?? team.displayName
 
+    if (!['mex','cuw','jor','pan','swe','bih','qat','sui','nzl','nor'].includes(team.teamKey)) {
+      continue
+    }
+
     const res = await fetch(`${AF_BASE}/teams?search=${encodeURIComponent(search)}`, {
       headers: { 'x-apisports-key': apiKey },
       cache: 'no-store',
