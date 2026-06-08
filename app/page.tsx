@@ -77,7 +77,7 @@ const COMPETITIONS = [
   },
   {
     key: 'mundial',
-    label: 'FIFA WORLD CUP',
+    label: 'MUNDIAL 2026',
     title: 'Copa Mundial de la FIFA 2026',
     logos: ['/logos/competitions/fwc2026.svg'],
   },
@@ -497,7 +497,7 @@ const roundMatches = activeRound
         <div style={{ position: 'relative' }}>
   <button
     aria-label="Abrir menú"
-    popoverTarget="competition-menu"
+    popovertarget="competition-menu"
     style={{
       width: 32,
       height: 32,
