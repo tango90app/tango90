@@ -1,5 +1,5 @@
 node_modules/
-.netx/
+.next/
 .env.local
 .env
 fixtures.json

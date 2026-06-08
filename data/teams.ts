@@ -328,6 +328,7 @@ export const NATIONAL_TEAMS: TangoTeam[] = [
     {
     teamKey: 'mex',
     type: 'national_team',
+    apiFootballId: 16,
     officialName: 'México',
     displayName: 'México',
     abbreviation: 'MEX',
@@ -340,6 +341,7 @@ export const NATIONAL_TEAMS: TangoTeam[] = [
   {
     teamKey: 'rsa',
     type: 'national_team',
+    apiFootballId: 1531,
     officialName: 'Sudáfrica',
     displayName: 'Sudáfrica',
     abbreviation: 'RSA',
@@ -352,6 +354,7 @@ export const NATIONAL_TEAMS: TangoTeam[] = [
   {
     teamKey: 'kor',
     type: 'national_team',
+    apiFootballId: 17,
     officialName: 'Corea del Sur',
     displayName: 'Corea del Sur',
     abbreviation: 'KOR',
@@ -364,6 +367,7 @@ export const NATIONAL_TEAMS: TangoTeam[] = [
   {
     teamKey: 'cze',
     type: 'national_team',
+    apiFootballId: 770,
     officialName: 'República Checa',
     displayName: 'República Checa',
     abbreviation: 'CZE',
@@ -377,6 +381,7 @@ export const NATIONAL_TEAMS: TangoTeam[] = [
   {
     teamKey: 'can',
     type: 'national_team',
+    apiFootballId: 5529,
     officialName: 'Canadá',
     displayName: 'Canadá',
     abbreviation: 'CAN',
@@ -389,6 +394,7 @@ export const NATIONAL_TEAMS: TangoTeam[] = [
   {
     teamKey: 'bih',
     type: 'national_team',
+    apiFootballId: 1113,
     officialName: 'Bosnia y Herzegovina',
     displayName: 'Bosnia',
     abbreviation: 'BIH',
@@ -401,6 +407,7 @@ export const NATIONAL_TEAMS: TangoTeam[] = [
   {
     teamKey: 'qat',
     type: 'national_team',
+    apiFootballId: 1569,
     officialName: 'Qatar',
     displayName: 'Qatar',
     abbreviation: 'QAT',
@@ -413,6 +420,7 @@ export const NATIONAL_TEAMS: TangoTeam[] = [
   {
     teamKey: 'sui',
     type: 'national_team',
+    apiFootballId: 15,
     officialName: 'Suiza',
     displayName: 'Suiza',
     abbreviation: 'SUI',
@@ -426,6 +434,7 @@ export const NATIONAL_TEAMS: TangoTeam[] = [
   {
     teamKey: 'bra',
     type: 'national_team',
+    apiFootballId: 6,
     officialName: 'Brasil',
     displayName: 'Brasil',
     abbreviation: 'BRA',
@@ -438,6 +447,7 @@ export const NATIONAL_TEAMS: TangoTeam[] = [
   {
     teamKey: 'mar',
     type: 'national_team',
+    apiFootballId: 31,
     officialName: 'Marruecos',
     displayName: 'Marruecos',
     abbreviation: 'MAR',
@@ -450,6 +460,7 @@ export const NATIONAL_TEAMS: TangoTeam[] = [
   {
     teamKey: 'hai',
     type: 'national_team',
+    apiFootballId: 2386,
     officialName: 'Haití',
     displayName: 'Haití',
     abbreviation: 'HAI',
@@ -462,6 +473,7 @@ export const NATIONAL_TEAMS: TangoTeam[] = [
   {
     teamKey: 'sco',
     type: 'national_team',
+    apiFootballId: 1108,
     officialName: 'Escocia',
     displayName: 'Escocia',
     abbreviation: 'SCO',
@@ -475,6 +487,7 @@ export const NATIONAL_TEAMS: TangoTeam[] = [
   {
     teamKey: 'usa',
     type: 'national_team',
+    apiFootballId: 2384,
     officialName: 'Estados Unidos',
     displayName: 'Estados Unidos',
     abbreviation: 'USA',
@@ -487,6 +500,7 @@ export const NATIONAL_TEAMS: TangoTeam[] = [
   {
     teamKey: 'par',
     type: 'national_team',
+    apiFootballId: 2380,
     officialName: 'Paraguay',
     displayName: 'Paraguay',
     abbreviation: 'PAR',
@@ -499,6 +513,7 @@ export const NATIONAL_TEAMS: TangoTeam[] = [
   {
     teamKey: 'aus',
     type: 'national_team',
+    apiFootballId: 20,
     officialName: 'Australia',
     displayName: 'Australia',
     abbreviation: 'AUS',
@@ -511,6 +526,7 @@ export const NATIONAL_TEAMS: TangoTeam[] = [
   {
     teamKey: 'tur',
     type: 'national_team',
+    apiFootballId: 777,
     officialName: 'Turquía',
     displayName: 'Turquía',
     abbreviation: 'TUR',
@@ -524,6 +540,7 @@ export const NATIONAL_TEAMS: TangoTeam[] = [
   {
     teamKey: 'ger',
     type: 'national_team',
+    apiFootballId: 25,
     officialName: 'Alemania',
     displayName: 'Alemania',
     abbreviation: 'GER',
@@ -536,6 +553,7 @@ export const NATIONAL_TEAMS: TangoTeam[] = [
   {
     teamKey: 'cuw',
     type: 'national_team',
+    apiFootballId: 5530,
     officialName: 'Curazao',
     displayName: 'Curazao',
     abbreviation: 'CUW',
@@ -548,6 +566,7 @@ export const NATIONAL_TEAMS: TangoTeam[] = [
   {
     teamKey: 'civ',
     type: 'national_team',
+    apiFootballId: 1501,
     officialName: 'Costa de Marfil',
     displayName: 'Costa de Marfil',
     abbreviation: 'CIV',
@@ -560,6 +579,7 @@ export const NATIONAL_TEAMS: TangoTeam[] = [
   {
     teamKey: 'ecu',
     type: 'national_team',
+    apiFootballId: 2382,
     officialName: 'Ecuador',
     displayName: 'Ecuador',
     abbreviation: 'ECU',
@@ -573,6 +593,7 @@ export const NATIONAL_TEAMS: TangoTeam[] = [
   {
     teamKey: 'ned',
     type: 'national_team',
+    apiFootballId: 1118,
     officialName: 'Países Bajos',
     displayName: 'Países Bajos',
     abbreviation: 'NED',
@@ -585,6 +606,7 @@ export const NATIONAL_TEAMS: TangoTeam[] = [
   {
     teamKey: 'jpn',
     type: 'national_team',
+    apiFootballId: 12,
     officialName: 'Japón',
     displayName: 'Japón',
     abbreviation: 'JPN',
@@ -597,6 +619,7 @@ export const NATIONAL_TEAMS: TangoTeam[] = [
   {
     teamKey: 'swe',
     type: 'national_team',
+    apiFootballId: 5,
     officialName: 'Suecia',
     displayName: 'Suecia',
     abbreviation: 'SWE',
@@ -609,6 +632,7 @@ export const NATIONAL_TEAMS: TangoTeam[] = [
   {
     teamKey: 'tun',
     type: 'national_team',
+    apiFootballId: 28,
     officialName: 'Túnez',
     displayName: 'Túnez',
     abbreviation: 'TUN',
@@ -622,6 +646,7 @@ export const NATIONAL_TEAMS: TangoTeam[] = [
   {
     teamKey: 'bel',
     type: 'national_team',
+    apiFootballId: 1,
     officialName: 'Bélgica',
     displayName: 'Bélgica',
     abbreviation: 'BEL',
@@ -634,6 +659,7 @@ export const NATIONAL_TEAMS: TangoTeam[] = [
   {
     teamKey: 'egy',
     type: 'national_team',
+    apiFootballId: 32,
     officialName: 'Egipto',
     displayName: 'Egipto',
     abbreviation: 'EGY',
@@ -646,6 +672,7 @@ export const NATIONAL_TEAMS: TangoTeam[] = [
   {
     teamKey: 'irn',
     type: 'national_team',
+    apiFootballId: 22,
     officialName: 'Irán',
     displayName: 'Irán',
     abbreviation: 'IRN',
@@ -658,6 +685,7 @@ export const NATIONAL_TEAMS: TangoTeam[] = [
   {
     teamKey: 'nzl',
     type: 'national_team',
+    apiFootballId: 4673,
     officialName: 'Nueva Zelanda',
     displayName: 'Nueva Zelanda',
     abbreviation: 'NZL',
@@ -671,6 +699,7 @@ export const NATIONAL_TEAMS: TangoTeam[] = [
   {
     teamKey: 'esp',
     type: 'national_team',
+    apiFootballId: 9,
     officialName: 'España',
     displayName: 'España',
     abbreviation: 'ESP',
@@ -683,6 +712,7 @@ export const NATIONAL_TEAMS: TangoTeam[] = [
   {
     teamKey: 'cpv',
     type: 'national_team',
+    apiFootballId: 1533,
     officialName: 'Cabo Verde',
     displayName: 'Cabo Verde',
     abbreviation: 'CPV',
@@ -695,6 +725,7 @@ export const NATIONAL_TEAMS: TangoTeam[] = [
   {
     teamKey: 'ksa',
     type: 'national_team',
+    apiFootballId: 23,
     officialName: 'Arabia Saudita',
     displayName: 'Arabia Saudita',
     abbreviation: 'KSA',
@@ -707,6 +738,7 @@ export const NATIONAL_TEAMS: TangoTeam[] = [
   {
     teamKey: 'uru',
     type: 'national_team',
+    apiFootballId: 7,
     officialName: 'Uruguay',
     displayName: 'Uruguay',
     abbreviation: 'URU',
@@ -720,6 +752,7 @@ export const NATIONAL_TEAMS: TangoTeam[] = [
   {
     teamKey: 'fra',
     type: 'national_team',
+    apiFootballId: 2,
     officialName: 'Francia',
     displayName: 'Francia',
     abbreviation: 'FRA',
@@ -732,6 +765,7 @@ export const NATIONAL_TEAMS: TangoTeam[] = [
   {
     teamKey: 'sen',
     type: 'national_team',
+    apiFootballId: 13,
     officialName: 'Senegal',
     displayName: 'Senegal',
     abbreviation: 'SEN',
@@ -744,6 +778,7 @@ export const NATIONAL_TEAMS: TangoTeam[] = [
   {
     teamKey: 'irq',
     type: 'national_team',
+    apiFootballId: 1567,
     officialName: 'Irak',
     displayName: 'Irak',
     abbreviation: 'IRQ',
@@ -756,6 +791,7 @@ export const NATIONAL_TEAMS: TangoTeam[] = [
   {
     teamKey: 'nor',
     type: 'national_team',
+    apiFootballId: 1090,
     officialName: 'Noruega',
     displayName: 'Noruega',
     abbreviation: 'NOR',
@@ -769,6 +805,7 @@ export const NATIONAL_TEAMS: TangoTeam[] = [
   {
     teamKey: 'arg',
     type: 'national_team',
+    apiFootballId: 26,
     officialName: 'Argentina',
     displayName: 'Argentina',
     abbreviation: 'ARG',
@@ -781,6 +818,7 @@ export const NATIONAL_TEAMS: TangoTeam[] = [
   {
     teamKey: 'alg',
     type: 'national_team',
+    apiFootballId: 1532,
     officialName: 'Argelia',
     displayName: 'Argelia',
     abbreviation: 'ALG',
@@ -793,6 +831,7 @@ export const NATIONAL_TEAMS: TangoTeam[] = [
   {
     teamKey: 'aut',
     type: 'national_team',
+    apiFootballId: 775,
     officialName: 'Austria',
     displayName: 'Austria',
     abbreviation: 'AUT',
@@ -805,6 +844,7 @@ export const NATIONAL_TEAMS: TangoTeam[] = [
   {
     teamKey: 'jor',
     type: 'national_team',
+    apiFootballId: 1548,
     officialName: 'Jordania',
     displayName: 'Jordania',
     abbreviation: 'JOR',
@@ -818,6 +858,7 @@ export const NATIONAL_TEAMS: TangoTeam[] = [
   {
     teamKey: 'por',
     type: 'national_team',
+    apiFootballId: 27,
     officialName: 'Portugal',
     displayName: 'Portugal',
     abbreviation: 'POR',
@@ -830,6 +871,7 @@ export const NATIONAL_TEAMS: TangoTeam[] = [
   {
     teamKey: 'cod',
     type: 'national_team',
+    apiFootballId: 1508,
     officialName: 'Congo',
     displayName: 'Congo',
     abbreviation: 'COD',
@@ -842,6 +884,7 @@ export const NATIONAL_TEAMS: TangoTeam[] = [
   {
     teamKey: 'uzb',
     type: 'national_team',
+    apiFootballId: 1568,
     officialName: 'Uzbekistán',
     displayName: 'Uzbekistán',
     abbreviation: 'UZB',
@@ -854,6 +897,7 @@ export const NATIONAL_TEAMS: TangoTeam[] = [
   {
     teamKey: 'col',
     type: 'national_team',
+    apiFootballId: 8,
     officialName: 'Colombia',
     displayName: 'Colombia',
     abbreviation: 'COL',
@@ -867,6 +911,7 @@ export const NATIONAL_TEAMS: TangoTeam[] = [
   {
     teamKey: 'eng',
     type: 'national_team',
+    apiFootballId: 10,
     officialName: 'Inglaterra',
     displayName: 'Inglaterra',
     abbreviation: 'ENG',
@@ -879,6 +924,7 @@ export const NATIONAL_TEAMS: TangoTeam[] = [
   {
     teamKey: 'cro',
     type: 'national_team',
+    apiFootballId: 3,
     officialName: 'Croacia',
     displayName: 'Croacia',
     abbreviation: 'CRO',
@@ -891,6 +937,7 @@ export const NATIONAL_TEAMS: TangoTeam[] = [
   {
     teamKey: 'gha',
     type: 'national_team',
+    apiFootballId: 1504,
     officialName: 'Ghana',
     displayName: 'Ghana',
     abbreviation: 'GHA',
@@ -903,6 +950,7 @@ export const NATIONAL_TEAMS: TangoTeam[] = [
   {
     teamKey: 'pan',
     type: 'national_team',
+    apiFootballId: 11,
     officialName: 'Panamá',
     displayName: 'Panamá',
     abbreviation: 'PAN',
@@ -922,7 +970,9 @@ export const ALL_TEAMS: TangoTeam[] = [
 // ── Lookups ──────────────────────────────────────────────────────────────
 
 export const TEAMS_BY_API_FOOTBALL_ID = new Map(
-  TEAMS.map(team => [team.apiFootballId, team])
+  ALL_TEAMS
+    .filter(team => team.apiFootballId)
+    .map(team => [team.apiFootballId, team])
 )
 
 export const TEAMS_BY_KEY = new Map(

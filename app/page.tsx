@@ -466,8 +466,8 @@ const roundMatches = activeRound
 </a>
         <div style={{ position: 'relative' }}>
   <button
-    aria-label="Menú desactivado"
-    disabled
+    aria-label="Abrir menú"
+    popoverTarget="competition-menu"
     style={{
       width: 32,
       height: 32,
@@ -479,8 +479,8 @@ const roundMatches = activeRound
       justifyContent: 'center',
       alignItems: 'center',
       gap: 5,
-      cursor: 'default',
-      opacity: 0.45,
+      cursor: 'pointer',
+      opacity: 1,
     }}
   >
     <span style={{ width: 22, height: 2, background: '#9CA3AF', borderRadius: 2 }} />
