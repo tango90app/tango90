@@ -713,6 +713,7 @@ const roundMatches = activeRound
           width: 28,
           height: 20,
           overflow: 'hidden',
+          background: 'transparent'
           border: '1px solid rgba(255,255,255)',
           borderTopLeftRadius: 0,
           borderTopRightRadius: 6,
@@ -726,7 +727,7 @@ const roundMatches = activeRound
           style={{
             width: '100%',
             height: '100%',
-            objectFit: 'fill',
+            objectFit: 'cover',
             display: 'block',
           }}
         />
@@ -784,6 +785,7 @@ const roundMatches = activeRound
           width: 28,
           height: 20,
           overflow: 'hidden',
+          background: 'transparent'
           border: '1px solid rgba(255,255,255)',
           borderTopLeftRadius: 0,
           borderTopRightRadius: 6,
@@ -797,7 +799,7 @@ const roundMatches = activeRound
           style={{
             width: '100%',
             height: '100%',
-            objectFit: 'fill',
+            objectFit: 'cover',
             display: 'block',
           }}
         />
