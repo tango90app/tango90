@@ -78,7 +78,7 @@ const COMPETITIONS = [
   {
     key: 'mundial',
     label: 'FIFA WORLD CUP',
-    title: 'COPA MUNDIAL de la FIFA',
+    title: 'Copa Mundial de la FIFA 2026',
     logos: [],
   },
 ] as const
@@ -157,6 +157,23 @@ function normalizeRound(round?: string, competitionKey?: CompetitionKey) {
     if (r.includes('semi')) return 'APERTURA · SEMIFINAL'
     if (r === 'final') return 'APERTURA · FINAL'
   }
+
+  // ── MUNDIAL ─────────────────────────────────────────────
+
+if (competitionKey === 'mundial') {
+  const groupStageMatch = r.match(/group stage\s*-\s*(\d+)/)
+
+  if (groupStageMatch) {
+    return `FASE DE GRUPOS · FECHA ${groupStageMatch[1]}`
+  }
+
+  if (r.includes('round of 32')) return '16vos DE FINAL'
+  if (r.includes('round of 16')) return '8vos DE FINAL'
+  if (r.includes('quarter')) return '4tos DE FINAL'
+  if (r.includes('semi')) return 'SEMIFINAL'
+  if (r.includes('3rd')) return '3er PUESTO'
+  if (r === 'final') return 'FINAL'
+}
 
   return round.toUpperCase()
 }
@@ -321,7 +338,10 @@ for (const row of voteRows ?? []) {
   voteCountsByMatchId[matchId] = (voteCountsByMatchId[matchId] ?? 0) + 1
 }
 
-  const activeCompetitionKey = 'lpf' as CompetitionKey
+  const activeCompetitionKey =
+  typeof searchParams?.competition === 'string'
+    ? (searchParams.competition as CompetitionKey)
+    : 'lpf'
 
 const activeCompetition =
   COMPETITIONS.find(c => c.key === activeCompetitionKey) ?? COMPETITIONS[0]
@@ -332,6 +352,16 @@ const visibleCompetitions = COMPETITIONS.filter(competition =>
 
 const filteredMatches = allMatches.filter(match =>
   getCompetitionKey(match) === activeCompetitionKey
+)
+
+console.log(
+  'LPF TEST',
+  filteredMatches.slice(0, 10).map(m => ({
+    id: m.id,
+    status: m.status,
+    round: m.round,
+    match_end_at: m.match_end_at,
+  }))
 )
 
 const roundOrder =
@@ -380,7 +410,7 @@ const availableRounds = Array.from(
 const activeRound =
   typeof searchParams?.round === 'string'
     ? decodeURIComponent(searchParams.round)
-    : availableRounds[availableRounds.length - 1]
+    : availableRounds[0]
 
 const activeRoundIndex = availableRounds.indexOf(activeRound)
 
@@ -667,13 +697,51 @@ const roundMatches = activeRound
   </div>
 
   {/* Home crest */}
-  <div style={{ width: 24, height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-    {String(match.home.badge).startsWith('/') ? (
-      <img src={match.home.badge} alt="" style={{ width: 22, height: 22, objectFit: 'contain' }} />
+<div
+  style={{
+    width: String(match.home.badge).includes('/logos/flags/') ? 28 : 24,
+    height: 24,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  }}
+>
+  {String(match.home.badge).startsWith('/') ? (
+    String(match.home.badge).includes('/logos/flags/') ? (
+      <div
+        style={{
+          width: 28,
+          height: 20,
+          overflow: 'hidden',
+          border: '1px solid rgba(255,255,255,0.5)',
+          borderTopLeftRadius: 0,
+          borderTopRightRadius: 6,
+          borderBottomRightRadius: 0,
+          borderBottomLeftRadius: 6,
+        }}
+      >
+        <img
+          src={match.home.badge}
+          alt=""
+          style={{
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            display: 'block',
+          }}
+        />
+      </div>
     ) : (
-      <span style={{ fontSize: 18 }}>{match.home.badge}</span>
-    )}
-  </div>
+      <img
+        src={match.home.badge}
+        alt=""
+        style={{ width: 22, height: 22, objectFit: 'contain' }}
+      />
+    )
+  ) : (
+    <span style={{ fontSize: 18 }}>{match.home.badge}</span>
+  )}
+</div>
 
   {/* Center score / VS */}
   <div style={{
@@ -700,13 +768,51 @@ const roundMatches = activeRound
   </div>
 
   {/* Away crest */}
-  <div style={{ width: 24, height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-    {String(match.away.badge).startsWith('/') ? (
-      <img src={match.away.badge} alt="" style={{ width: 22, height: 22, objectFit: 'contain' }} />
+<div
+  style={{
+    width: String(match.away.badge).includes('/logos/flags/') ? 28 : 24,
+    height: 24,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  }}
+>
+  {String(match.away.badge).startsWith('/') ? (
+    String(match.away.badge).includes('/logos/flags/') ? (
+      <div
+        style={{
+          width: 28,
+          height: 20,
+          overflow: 'hidden',
+          border: '1px solid rgba(255,255,255,0.5)',
+          borderTopLeftRadius: 0,
+          borderTopRightRadius: 6,
+          borderBottomRightRadius: 0,
+          borderBottomLeftRadius: 6,
+        }}
+      >
+        <img
+          src={match.away.badge}
+          alt=""
+          style={{
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            display: 'block',
+          }}
+        />
+      </div>
     ) : (
-      <span style={{ fontSize: 18 }}>{match.away.badge}</span>
-    )}
-  </div>
+      <img
+        src={match.away.badge}
+        alt=""
+        style={{ width: 22, height: 22, objectFit: 'contain' }}
+      />
+    )
+  ) : (
+    <span style={{ fontSize: 18 }}>{match.away.badge}</span>
+  )}
+</div>
 
   {/* Away */}
   <div style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center', gap: 6, minWidth: 0 }}>
