@@ -79,7 +79,7 @@ const COMPETITIONS = [
     key: 'mundial',
     label: 'FIFA WORLD CUP',
     title: 'Copa Mundial de la FIFA 2026',
-    logos: [],
+    logos: ['/logos/competitions/fwc2026.svg'],
   },
 ] as const
 
