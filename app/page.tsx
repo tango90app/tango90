@@ -713,7 +713,7 @@ const roundMatches = activeRound
           width: 28,
           height: 20,
           overflow: 'hidden',
-          border: '0.5px solid rgba(255,255,255)',
+          border: '1px solid rgba(255,255,255)',
           borderTopLeftRadius: 0,
           borderTopRightRadius: 6,
           borderBottomRightRadius: 0,
