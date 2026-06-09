@@ -1139,18 +1139,16 @@ function PlayerChip({ player, matchId, cx, cy, primaryColor, secondaryColor, avg
     <span style={{
       position: 'absolute',
       left: '50%',
-      top: -15,
+      top: -8,
       transform: 'translateX(-50%)',
-      fontFamily: 'Plus Jakarta Sans, sans-serif',
-      fontSize: 10,
-      fontWeight: 700,
-      color: C.text3,
+      fontSize: 12,
+      fontWeight: 800,
+      color: 'rgba(255,255,255,0.86)',
       lineHeight: 1,
-      whiteSpace: 'nowrap',
       textShadow: '0 1px 3px rgba(0,0,0,0.75)',
       pointerEvents: 'none',
     }}>
-      ↓{player.minuteOutDisplay ?? `${player.minuteOut}'`}
+      ↓
     </span>
   )}
 </span>
@@ -1159,7 +1157,7 @@ function PlayerChip({ player, matchId, cx, cy, primaryColor, secondaryColor, avg
 
       {/* FIX 2: Name — always rendered, below the circle */}
 <span style={{
-  marginTop: 6,
+  marginTop: 2,
   fontSize: 10,
   fontWeight: 600,
   color: C.text,
@@ -1175,10 +1173,33 @@ function PlayerChip({ player, matchId, cx, cy, primaryColor, secondaryColor, avg
   {formatPlayerShortName(player.name)}
 </span>
 
+{/* Average — secondary */}
+<div style={{
+  marginTop: 0,
+  minHeight: 14,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+}}>
+  <span style={{
+    fontSize: 9,
+    fontWeight: 500,
+    letterSpacing: '0.04em',
+    color: showAvg ? 'rgba(255,255,255,0.55)' : 'rgba(255,255,255,0.28)',
+    lineHeight: 1,
+    textShadow: '0 1px 4px rgba(0,0,0,0.95), 0 0 8px rgba(0,0,0,0.8)',
+  }}>
+    {typeof window !== 'undefined' && showAvg
+      ? ratingLabel(serverAvg!)
+      : ''
+    }
+  </span>
+</div>
+
 
             {/* My vote — primary */}
 <div style={{
-  marginTop: 4,
+  marginTop: 2,
   height: 22,
   minWidth: 32,
   background: myVote !== null ? ratingBg(myVote) : 'rgba(37,37,46,0.85)',
@@ -1192,7 +1213,7 @@ function PlayerChip({ player, matchId, cx, cy, primaryColor, secondaryColor, avg
   : 'none',
 }}>
   <span style={{
-    fontSize: 12,
+    fontSize: 16,
     fontWeight: 800,
     color: '#fff',
     lineHeight: 1,
@@ -1204,27 +1225,7 @@ function PlayerChip({ player, matchId, cx, cy, primaryColor, secondaryColor, avg
   </span>
 </div>
 
-{/* Average — secondary */}
-<div style={{
-  marginTop: 4,
-  minHeight: 14,
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-}}>
-  <span style={{
-    fontSize: 10,
-    fontWeight: 600,
-    color: showAvg ? 'rgba(255,255,255,0.55)' : 'rgba(255,255,255,0.28)',
-    lineHeight: 1,
-    textShadow: '0 1px 4px rgba(0,0,0,0.95), 0 0 8px rgba(0,0,0,0.8)',
-  }}>
-    {typeof window !== 'undefined' && showAvg
-      ? ratingLabel(serverAvg!)
-      : ''
-    }
-  </span>
-</div>
+
     </button>
   )
 }
