@@ -716,9 +716,9 @@ const roundMatches = activeRound
           background: 'transparent',
           border: '1px solid rgba(255,255,255)',
           borderTopLeftRadius: 0,
-          borderTopRightRadius: 6,
+          borderTopRightRadius: 9,
           borderBottomRightRadius: 0,
-          borderBottomLeftRadius: 6,
+          borderBottomLeftRadius: 9,
         }}
       >
         <img
@@ -788,9 +788,9 @@ const roundMatches = activeRound
           background: 'transparent',
           border: '1px solid rgba(255,255,255)',
           borderTopLeftRadius: 0,
-          borderTopRightRadius: 6,
+          borderTopRightRadius: 9,
           borderBottomRightRadius: 0,
-          borderBottomLeftRadius: 6,
+          borderBottomLeftRadius: 9,
         }}
       >
         <img
