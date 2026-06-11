@@ -161,7 +161,7 @@ function getVisualOffset(player: ProcessedPlayer, row: number, col: number, maxC
   const isCenter = maxCol <= 2 || (col > 1 && col < maxCol)
 
   // Defensa: laterales más adelantados, centrales más bajos
-  if (row === 2) {
+    if (row === 2) {
     if (isWide) {
       // Laterales
       y += 0
@@ -169,7 +169,13 @@ function getVisualOffset(player: ProcessedPlayer, row: number, col: number, maxC
     } else {
       // Centrales
       y -= 20
-      x += col <= maxCol / 2 ? 6 : -6
+
+      const isMiddleCenterBack =
+        maxCol % 2 === 1 && col === Math.ceil(maxCol / 2)
+
+      if (!isMiddleCenterBack) {
+        x += col <= maxCol / 2 ? 6 : -6
+      }
     }
   }
 
@@ -788,22 +794,57 @@ function TeamTab({ team, isActive, myTeamAvg, teamAvg, onClick }: {
         aria-label={`${team.name} badge`}
       >
         {String(team.badge).startsWith('/') ? (
-  <img
-    src={team.badge}
-    alt=""
-    style={{
-      width: isActive ? 28 : 20,
-      height: isActive ? 28 : 20,
-      objectFit: 'contain',
-      display: 'block',
-      opacity: isActive ? 1 : 0.5,
-      filter: isActive ? 'none' : 'grayscale(100%)',
-      transition: 'all 180ms ease',
-    }}
-  />
-) : (
-  team.badge
-)}
+
+          String(team.badge).includes('/logos/flags/') ? (
+
+            <div
+              style={{
+                width: isActive ? 28 : 22,
+                height: isActive ? 20 : 16,
+                overflow: 'hidden',
+                border: '1px solid rgba(255,255,255)',
+                borderTopLeftRadius: 0,
+                borderTopRightRadius: 9,
+                borderBottomRightRadius: 0,
+                borderBottomLeftRadius: 9,
+                opacity: isActive ? 1 : 0.5,
+                filter: isActive ? 'none' : 'grayscale(100%)',
+                transition: 'all 180ms ease',
+              }}
+            >
+              <img
+                src={team.badge}
+                alt=""
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover',
+                  display: 'block',
+                }}
+              />
+            </div>
+
+          ) : (
+
+            <img
+              src={team.badge}
+              alt=""
+              style={{
+                width: isActive ? 28 : 20,
+                height: isActive ? 28 : 20,
+                objectFit: 'contain',
+                display: 'block',
+                opacity: isActive ? 1 : 0.5,
+                filter: isActive ? 'none' : 'grayscale(100%)',
+                transition: 'all 180ms ease',
+              }}
+            />
+
+          )
+
+        ) : (
+          team.badge
+        )}
       </span>
       {myTeamAvg !== null && (
         <span style={{ fontSize: 11, fontWeight: 700, color: '#fff', background: ratingBg(myTeamAvg), padding: '1px 7px', borderRadius: 6 }}>
