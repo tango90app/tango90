@@ -161,10 +161,19 @@ function normalizeRound(round?: string, competitionKey?: CompetitionKey) {
   // ── MUNDIAL ─────────────────────────────────────────────
 
 if (competitionKey === 'mundial') {
-  const groupStageMatch = r.match(/group stage\s*-\s*(\d+)/)
+
+  const groupStageMatch =
+    r.match(/group stage\s*-\s*(\d+)/)
 
   if (groupStageMatch) {
     return `FASE DE GRUPOS · FECHA ${groupStageMatch[1]}`
+  }
+
+  const fechaMatch =
+    r.match(/fecha\s*(\d+)/)
+
+  if (fechaMatch) {
+    return `FASE DE GRUPOS · FECHA ${fechaMatch[1]}`
   }
 
   if (r.includes('round of 32')) return '16vos DE FINAL'
@@ -232,6 +241,26 @@ type HomeProps = {
 }
 }
 
+function mapTrackedFixtureStatus(status: string) {
+  switch (status) {
+    case '1H':
+    case 'HT':
+    case '2H':
+    case 'ET':
+    case 'BT':
+    case 'P':
+    case 'INT':
+      return 'live'
+
+    case 'SUSP':
+    case 'suspended':
+      return 'suspended'
+
+    default:
+      return 'upcoming'
+  }
+}
+
 export default async function Home({ searchParams }: HomeProps) {
   noStore()
 
@@ -273,13 +302,14 @@ away: normalizeTeam(m.away),
     .order('kickoff_at', { ascending: true })
 
     const apiMatchIds = new Set(apiMatches.map(m => m.id))
-    const trackedMatches: Match[] = (trackedRows ?? [])
-  .filter((row: any) => !apiMatchIds.has(row.internal_match_id))
-  .map((row: any) => ({
-    id: row.internal_match_id,
-    date: new Date(row.kickoff_at).toLocaleDateString('sv-SE', {
-  timeZone: 'America/Argentina/Buenos_Aires'
-}),
+
+    const trackedMatches: Match[] = (trackedRows ?? [])  
+      .filter((row: any) => !apiMatchIds.has(row.internal_match_id))
+      .map((row: any) => ({
+        id: row.internal_match_id,
+        date: new Date(row.kickoff_at).toLocaleDateString('sv-SE', {
+      timeZone: 'America/Argentina/Buenos_Aires'
+    }),
     time: new Date(row.kickoff_at).toLocaleTimeString('es-AR', {
       hour: '2-digit',
       minute: '2-digit',
@@ -289,13 +319,15 @@ away: normalizeTeam(m.away),
     tournament: row.league_name ?? 'Liga Profesional Argentina',
     round: row.round ?? 'Próximo',
     stadium: '',
-    status: row.status === 'suspended' ? 'suspended' : 'upcoming',
+    status: mapTrackedFixtureStatus(row.status),
+    minute: row.minute ?? null,
+    apiStatus: row.api_status ?? null,
     home: {
   id: getTeamByApiFootballId(row.home_team_id)?.teamKey ?? `api-team-${row.home_team_id}`,
   name: getTeamByApiFootballId(row.home_team_id)?.displayName ?? row.home_name,
   shortName: getTeamByApiFootballId(row.home_team_id)?.abbreviation ?? row.home_name.slice(0, 3).toUpperCase(),
   badge: getTeamByApiFootballId(row.home_team_id)?.crestPath ?? '🏟️',
-  score: 0,
+  score: row.home_score ?? 0,
   players: [],
   coach: { id: `api-coach-${row.home_team_id}`, name: '' },
 },
@@ -304,7 +336,7 @@ away: {
   name: getTeamByApiFootballId(row.away_team_id)?.displayName ?? row.away_name,
   shortName: getTeamByApiFootballId(row.away_team_id)?.abbreviation ?? row.away_name.slice(0, 3).toUpperCase(),
   badge: getTeamByApiFootballId(row.away_team_id)?.crestPath ?? '🏟️',
-  score: 0,
+  score: row.away_score ?? 0,
   players: [],
   coach: { id: `api-coach-${row.away_team_id}`, name: '' },
 },
