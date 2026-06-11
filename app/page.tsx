@@ -58,6 +58,24 @@ function formatDate(dateStr: string) {
 }
 const COMPETITIONS = [
   {
+    key: 'lpf',
+    label: 'LPF',
+    title: 'LIGA PROFESIONAL DE FÚTBOL',
+    logos: ['/logos/competitions/afa.svg', '/logos/competitions/lpf.svg'],
+  },
+  {
+    key: 'libertadores',
+    label: 'COPA LIBERTADORES',
+    title: 'CONMEBOL LIBERTADORES',
+    logos: [],
+  },
+  {
+    key: 'sudamericana',
+    label: 'COPA SUDAMERICANA',
+    title: 'COPA CONMEBOL SUDAMERICANA',
+    logos: [],
+  },
+  {
     key: 'mundial',
     label: 'MUNDIAL 2026',
     title: 'Copa Mundial de la FIFA 2026',
@@ -320,7 +338,10 @@ for (const row of voteRows ?? []) {
   voteCountsByMatchId[matchId] = (voteCountsByMatchId[matchId] ?? 0) + 1
 }
 
-  const activeCompetitionKey = 'mundial'
+  const activeCompetitionKey =
+    typeof searchParams?.competition === 'string'
+      ? (searchParams.competition as CompetitionKey)
+      : 'mundial'
 
 const activeCompetition =
   COMPETITIONS.find(c => c.key === activeCompetitionKey) ?? COMPETITIONS[0]
@@ -515,7 +536,9 @@ const roundMatches = activeRound
       margin: 0,
     }}
   >
-    {COMPETITIONS.map(c => (
+    {COMPETITIONS
+      .filter(c => c.key === 'mundial')
+      .map(c => (
       <Link
         key={c.key}
         href={`/?competition=${c.key}`}
