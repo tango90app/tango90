@@ -497,7 +497,7 @@ const roundMatches = activeRound
         <div style={{ position: 'relative' }}>
   <button
     aria-label="Abrir menú"
-    popovertarget="competition-menu"
+    popoverTarget="competition-menu"
     style={{
       width: 32,
       height: 32,
