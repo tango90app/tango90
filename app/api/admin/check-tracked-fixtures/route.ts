@@ -7,7 +7,13 @@ export const revalidate = 0
 
 const AF_BASE = 'https://v3.football.api-sports.io'
 const FINISHED = new Set(['FT', 'AET', 'PEN'])
-const SUSPENDED = new Set(['ABD', 'PST', 'CANC', 'SUSP'])
+const SUSPENDED = new Set([
+  'ABD',
+  'PST',
+  'CANC',
+  'SUSP',
+  'AWD'
+])
 
 export async function POST(req: NextRequest) {
   let body: any
