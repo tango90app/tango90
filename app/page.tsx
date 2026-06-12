@@ -15,7 +15,22 @@ export const revalidate = 0
 
 function LiveBadge() {
   return (
-    <span style={{ background: '#ef4444', color: '#fff', fontFamily: OBJ, fontSize: 10, fontWeight: 700, padding: '2px 7px', borderRadius: 3, letterSpacing: '0.08em' }}>
+    <span style={{
+      fontFamily: 'Oswald, sans-serif',
+      fontSize: 10,
+      fontWeight: 700,
+      borderRadius: 3,
+      letterSpacing: '0.07em',
+
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      minWidth: 64,
+      height: 22,
+
+      background: '#FF1200',
+      color: '#FFFFFF',
+    }}>
       ● EN VIVO
     </span>
   )
@@ -703,17 +718,38 @@ const roundMatches = activeRound
                   }}
                 >
                   {/* Time / status */}
-<div style={{ minWidth: 42, textAlign: 'left', display: 'flex', alignItems: 'center' }}>
-  <div style={{
-    fontFamily: getMatchTimeLabel(match).includes('H') ? OBJ : PJS,
-    fontSize: getMatchTimeLabel(match).includes('H') ? 15 : 11,
-    fontWeight: getMatchTimeLabel(match).includes('H') ? 700 : 600,
-    color: getMatchTimeLabel(match).includes('H') ? getCountdownColor(match) : '#6B7280',
-    letterSpacing: getMatchTimeLabel(match).includes('H') ? '0.02em' : '0.04em',
-  }}>
-    {getMatchTimeLabel(match)}
-  </div>
-</div>
+                  <div style={{ minWidth: 42, textAlign: 'left', display: 'flex', alignItems: 'center' }}>
+                    {match.status === 'live' ? (
+                      <div style={{
+                        width: 24,
+                        height: 24,
+                        borderRadius: '50%',
+                        background: '#00FED9',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontFamily: OBJ,
+                        fontSize: 12,
+                        fontWeight: 800,
+                        color: '#000000',
+                        lineHeight: 1,
+                      }}>
+                        {typeof (match as any).minute === 'number'
+                          ? `${(match as any).minute}'`
+                          : '•'}
+                      </div>
+                    ) : (
+                      <div style={{
+                        fontFamily: getMatchTimeLabel(match).includes('H') ? OBJ : PJS,
+                        fontSize: getMatchTimeLabel(match).includes('H') ? 15 : 11,
+                        fontWeight: getMatchTimeLabel(match).includes('H') ? 700 : 600,
+                        color: getMatchTimeLabel(match).includes('H') ? getCountdownColor(match) : '#6B7280',
+                        letterSpacing: getMatchTimeLabel(match).includes('H') ? '0.02em' : '0.04em',
+                      }}>
+                        {getMatchTimeLabel(match)}
+                      </div>
+                    )}
+                  </div>
 
                   <div style={{
   flex: 1,
