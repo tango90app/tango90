@@ -699,8 +699,13 @@ const roundMatches = activeRound
             {byDate[date].map(match => (
               <Link
   key={match.id}
-  href={match.status === 'finished' || match.status === 'live' ? `/partido/${match.id}` : '#'}
-  style={{ textDecoration: 'none', pointerEvents: match.status === 'finished' || match.status === 'live' ? 'auto' : 'none' }}
+  href={match.status === 'finished' ? `/partido/${match.id}` : '#'}
+  style={{
+  textDecoration: 'none',
+  pointerEvents: match.status === 'finished'
+    ? 'auto'
+    : 'none'
+}}
 >
                 <div
                   className="match-card"

@@ -67,12 +67,12 @@ export async function POST(req: NextRequest) {
         await supabaseServer
           .from('tracked_fixtures')
           .update({
-  status: 'suspended',
-  synced: true,
-  published: false,
-  last_checked_at: new Date().toISOString(),
-  updated_at: new Date().toISOString(),
-})
+            status: 'suspended',
+            synced: true,
+            published: false,
+            last_checked_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          })
           .eq('external_fixture_id', f.external_fixture_id)
 
         results.push({
