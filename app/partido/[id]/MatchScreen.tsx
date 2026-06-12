@@ -519,6 +519,7 @@ export default function MatchScreen({ match, processed }: Props) {
                 isActive={activeTeam === side}
                 myTeamAvg={myTeamAvg}
                 teamAvg={teamAvg}
+                reverse={side === 'home'}
                 onClick={() => handleTabClick(side)}
               />
             )
@@ -769,18 +770,24 @@ function EventBlock({ icon, homeEvents, awayEvents, nameById }: {
 }
 
 // ── FIX 5: Team Tab — badge slot ready for flag asset ─────────────────────
-function TeamTab({ team, isActive, myTeamAvg, teamAvg, onClick }: {
+function TeamTab({ team, isActive, myTeamAvg, teamAvg, onClick, reverse }: {
   team: ProcessedMatch['home']
   isActive: boolean
   myTeamAvg: number | null
   teamAvg: number | null
   onClick: () => void
+  reverse?: boolean
 }) {
   return (
     <button
       onClick={onClick}
       style={{
-        flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+        flex: 1,
+        display: 'flex',
+        flexDirection: reverse ? 'row-reverse' : 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 8,
         background: isActive ? C.accentDim : 'transparent',
         border: 'none',
         borderBottom: isActive ? `2px solid ${C.accent}` : '2px solid transparent',
