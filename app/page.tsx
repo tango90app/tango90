@@ -454,10 +454,44 @@ const availableRounds = Array.from(
   return ai - bi
 })
 
+const now = Date.now()
+
+const votingOpenMatches = filteredMatches
+  .filter(m => {
+    if (m.status !== 'finished' || !m.match_end_at) return false
+
+    const end = new Date(m.match_end_at).getTime()
+    const votingClosesAt = end + 24 * 60 * 60 * 1000
+
+    return votingClosesAt > now
+  })
+  .sort((a, b) => {
+    const aEnd = a.match_end_at ? new Date(a.match_end_at).getTime() : 0
+    const bEnd = b.match_end_at ? new Date(b.match_end_at).getTime() : 0
+
+    return bEnd - aEnd
+  })
+
+const nextUpcomingMatch = filteredMatches
+  .filter(m => m.status === 'upcoming' || m.status === 'live')
+  .sort((a, b) => {
+    const aTime = new Date(`${a.date}T${a.time}:00`).getTime()
+    const bTime = new Date(`${b.date}T${b.time}:00`).getTime()
+
+    return aTime - bTime
+  })[0]
+
+const defaultRound =
+  votingOpenMatches[0]
+    ? normalizeRound(votingOpenMatches[0].round, activeCompetitionKey)
+    : nextUpcomingMatch
+      ? normalizeRound(nextUpcomingMatch.round, activeCompetitionKey)
+      : availableRounds[0]
+
 const activeRound =
   typeof searchParams?.round === 'string'
     ? decodeURIComponent(searchParams.round)
-    : availableRounds[0]
+    : defaultRound
 
 const activeRoundIndex = availableRounds.indexOf(activeRound)
 
