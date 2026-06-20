@@ -441,8 +441,8 @@ export const NATIONAL_TEAMS: TangoTeam[] = [
     countryCode: 'br',
     fifaCode: 'BRA',
     crestPath: '/logos/flags/bra.svg',
-    primaryColor: '#009C3B',
-    secondaryColor: '#FFDF00',
+    primaryColor: '#FFDF00',
+    secondaryColor: '#009C3B',
   },
   {
     teamKey: 'mar',
@@ -547,8 +547,8 @@ export const NATIONAL_TEAMS: TangoTeam[] = [
     countryCode: 'de',
     fifaCode: 'GER',
     crestPath: '/logos/flags/ger.svg',
-    primaryColor: '#000000',
-    secondaryColor: '#DD0000',
+    primaryColor: '#FFFFFF',
+    secondaryColor: '#000000',
   },
   {
     teamKey: 'cuw',
@@ -601,7 +601,7 @@ export const NATIONAL_TEAMS: TangoTeam[] = [
     fifaCode: 'NED',
     crestPath: '/logos/flags/ned.svg',
     primaryColor: '#FF4F00',
-    secondaryColor: '#FFFFFF',
+    secondaryColor: '#000000',
   },
   {
     teamKey: 'jpn',
@@ -760,7 +760,7 @@ export const NATIONAL_TEAMS: TangoTeam[] = [
     fifaCode: 'FRA',
     crestPath: '/logos/flags/fra.svg',
     primaryColor: '#002654',
-    secondaryColor: '#ED2939',
+    secondaryColor: '#FFFFFF',
   },
   {
     teamKey: 'sen',
@@ -812,8 +812,8 @@ export const NATIONAL_TEAMS: TangoTeam[] = [
     countryCode: 'ar',
     fifaCode: 'ARG',
     crestPath: '/logos/flags/arg.svg',
-    primaryColor: '#75AADB',
-    secondaryColor: '#FFFFFF',
+    primaryColor: '#FFFFFF',
+    secondaryColor: '#75AADB',
   },
   {
     teamKey: 'alg',
@@ -865,8 +865,8 @@ export const NATIONAL_TEAMS: TangoTeam[] = [
     countryCode: 'pt',
     fifaCode: 'POR',
     crestPath: '/logos/flags/por.svg',
-    primaryColor: '#006600',
-    secondaryColor: '#FF0000',
+    primaryColor: '#FF0000',
+    secondaryColor: '#006600',
   },
   {
     teamKey: 'cod',
