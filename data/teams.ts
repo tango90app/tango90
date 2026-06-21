@@ -507,8 +507,8 @@ export const NATIONAL_TEAMS: TangoTeam[] = [
     countryCode: 'py',
     fifaCode: 'PAR',
     crestPath: '/logos/flags/par.svg',
-    primaryColor: '#D52B1E',
-    secondaryColor: '#0038A8',
+    primaryColor: '#FFFFFF',
+    secondaryColor: '#D52B1E',
   },
   {
     teamKey: 'aus',
@@ -865,7 +865,7 @@ export const NATIONAL_TEAMS: TangoTeam[] = [
     countryCode: 'pt',
     fifaCode: 'POR',
     crestPath: '/logos/flags/por.svg',
-    primaryColor: '#FF0000',
+    primaryColor: '#FF000',
     secondaryColor: '#006600',
   },
   {

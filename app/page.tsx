@@ -542,7 +542,57 @@ const roundMatches = activeRound
   })
 }
 
-  const dates = Object.keys(byDate).sort((a, b) => a.localeCompare(b))
+  const currentTime = Date.now()
+
+function getDatePriority(date: string) {
+  const matches = byDate[date] ?? []
+
+  const openVotingMatches = matches
+    .filter(m => m.status === 'finished' && m.match_end_at)
+    .map(m => new Date(m.match_end_at as string).getTime() + 24 * 60 * 60 * 1000)
+    .filter(closeTime => closeTime > currentTime)
+
+  if (openVotingMatches.length > 0) {
+    return {
+      group: 1,
+      time: Math.min(...openVotingMatches),
+    }
+  }
+
+  const hasLive = matches.some(m => m.status === 'live')
+
+  if (hasLive) {
+    return {
+      group: 2,
+      time: currentTime,
+    }
+  }
+
+  const hasUpcoming = matches.some(m => m.status === 'upcoming')
+
+  if (hasUpcoming) {
+    return {
+      group: 3,
+      time: new Date(date + 'T00:00:00').getTime(),
+    }
+  }
+
+  return {
+    group: 4,
+    time: new Date(date + 'T00:00:00').getTime(),
+  }
+}
+
+const dates = Object.keys(byDate).sort((a, b) => {
+  const pa = getDatePriority(a)
+  const pb = getDatePriority(b)
+
+  if (pa.group !== pb.group) {
+    return pa.group - pb.group
+  }
+
+  return pa.time - pb.time
+})
 
   return (
     <div style={{ background: '#0B0B0F', minHeight: '100vh' }}>
