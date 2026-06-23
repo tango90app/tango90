@@ -266,6 +266,7 @@ export function processMatch(match: Match): ProcessedMatch {
       // EVENTO DE JUEGO — requiere estar en cancha y no haber sido expulsado
       const s = state.get(event.playerId)!
       const p = playerMap.get(event.playerId)!
+      const isOwnGoal = (event as MatchEvent & { isOwnGoal?: boolean }).isOwnGoal === true
 
       if (s.redCarded) {
         warnings.push({
@@ -281,7 +282,7 @@ export function processMatch(match: Match): ProcessedMatch {
           playerId: event.playerId,
           eventIndex: i,
         })
-      } else {
+      } else if (!isOwnGoal) {
         s.goals += 1
       }
     }

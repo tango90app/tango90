@@ -718,12 +718,60 @@ function EventBlock({ icon, homeEvents, awayEvents, nameById }: {
   function label(e: MatchEvent): string {
     return (e.type === 'goal' || e.type === 'red_card') ? (nameById.get(e.playerId) ?? '') : ''
   }
+
+  function isOwnGoal(e: MatchEvent): boolean {
+    return (
+      e.type === 'goal' &&
+      (e as MatchEvent & { isOwnGoal?: boolean }).isOwnGoal === true
+    )
+  }
+
+  type EventGroup = {
+  key: string
+  name: string
+  minutes: string[]
+  ownGoal: boolean
+  firstMinute: number
+}
+
+function groupEvents(events: MatchEvent[]): EventGroup[] {
+  const groups = new Map<string, EventGroup>()
+
+  for (const e of events) {
+    const ownGoal = isOwnGoal(e)
+    const name = label(e)
+
+    const playerKey =
+      e.type === 'goal' || e.type === 'red_card'
+        ? e.playerId
+        : String(e.minute)
+
+    const key = `${e.type}_${playerKey}_${ownGoal ? 'gc' : 'normal'}`
+
+    const minuteText = formatEventMinute(e.period, e.minuteInPeriod, e.minute)
+
+    if (!groups.has(key)) {
+      groups.set(key, {
+        key,
+        name,
+        minutes: [],
+        ownGoal,
+        firstMinute: e.minute,
+      })
+    }
+
+    groups.get(key)!.minutes.push(minuteText)
+  }
+
+  return Array.from(groups.values()).sort((a, b) => a.firstMinute - b.firstMinute)
+}
+
   return (
     <div style={{ marginTop: 10, display: 'flex', alignItems: 'flex-start' }}>
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 3 }}>
-        {homeEvents.map((e, i) => (
-          <span key={i} style={{ fontSize: 11, color: C.text2, textAlign: 'right' }}>
-            {label(e)} {formatEventMinute(e.period, e.minuteInPeriod, e.minute)}
+        {groupEvents(homeEvents).map(g => (
+          <span key={g.key} style={{ fontSize: 11, color: C.text2, textAlign: 'right' }}>
+            {g.ownGoal ? '(GC) ' : ''}{g.name} {g.minutes.join(', ')}
           </span>
         ))}
       </div>
@@ -759,9 +807,9 @@ function EventBlock({ icon, homeEvents, awayEvents, nameById }: {
   )}
 </div>
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 3 }}>
-        {awayEvents.map((e, i) => (
-          <span key={i} style={{ fontSize: 11, color: C.text2 }}>
-            {formatEventMinute(e.period, e.minuteInPeriod, e.minute)} {label(e)}
+        {groupEvents(awayEvents).map(g => (
+          <span key={g.key} style={{ fontSize: 11, color: C.text2 }}>
+            {g.minutes.join(', ')} {g.name}{g.ownGoal ? ' (GC)' : ''}
           </span>
         ))}
       </div>
@@ -1136,24 +1184,31 @@ function PlayerChip({ player, matchId, cx, cy, primaryColor, secondaryColor, avg
     left: -10,
     top: '50%',
     transform: 'translateY(-50%)',
-    display: 'flex',
-    alignItems: 'center',
-    gap: 2,
+    width: 20,
+    height: 20,
     pointerEvents: 'none',
   }}>
     {player.goals > 1 && (
       <span style={{
+        position: 'absolute',
+        right: 22,
+        top: '50%',
+        transform: 'translateY(-50%)',
         fontSize: 7,
         fontWeight: 800,
         color: 'rgba(255,255,255,0.86)',
         lineHeight: 1,
         textShadow: '0 1px 3px rgba(0,0,0,0.8)',
+        whiteSpace: 'nowrap',
       }}>
         ×{player.goals}
       </span>
     )}
 
     <span style={{
+      position: 'absolute',
+      left: 0,
+      top: 0,
       width: 20,
       height: 20,
       backgroundImage: 'url(/logos/objects/tango_ball.svg)',
@@ -1161,7 +1216,6 @@ function PlayerChip({ player, matchId, cx, cy, primaryColor, secondaryColor, avg
       backgroundRepeat: 'no-repeat',
       backgroundPosition: 'center',
       filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.65))',
-      flexShrink: 0,
     }} />
   </span>
 )}

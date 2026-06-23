@@ -268,11 +268,21 @@ function buildEvents(
     const team = ev.team.id === homeTeamId ? 'home' as const : 'away' as const
 
     if (ev.type === 'Goal') {
+      const detail = ev.detail?.toLowerCase() ?? ''
+
+      const isMissedPenalty =
+        detail.includes('missed penalty') ||
+        (detail.includes('penalty') && detail.includes('miss'))
+
+      if (isMissedPenalty) {
+        continue
+      }
+
       const scorerId = ev.player.id
       if (!scorerId) continue
 
-      const isOwn = ev.detail?.toLowerCase().includes('own goal')
-      const isPen = ev.detail?.toLowerCase().includes('penalty')
+      const isOwn = detail.includes('own goal')
+      const isPen = detail.includes('penalty')
 
       events.push({
         type:     'goal',
@@ -298,7 +308,7 @@ function buildEvents(
         events.push({ type: 'red_card', playerId: playerId(pid), minute, period, minuteInPeriod, team, isDoubleYellow: true } as MatchEvent)
       }
 
-        } else if (ev.type === 'subst') {
+    } else if (ev.type === 'subst') {
       // API-Football: player = sale, assist = entra
       const lineup = team === 'home' ? homeLineup : awayLineup
 
