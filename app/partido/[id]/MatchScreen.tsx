@@ -1429,6 +1429,7 @@ function SubRow({ player, matchId, primaryColor, secondaryColor, avgData, phase,
   }, [entityId])
   const myVote       = avgData?.myVote ?? localVote
   const displayScore = getDisplayScore(phase, myVote, avgData?.avg ?? null)
+  const hasPlayerEvent = player.goals > 0 || player.redCard
 
   return (
     <button onClick={() => {
@@ -1459,19 +1460,44 @@ function SubRow({ player, matchId, primaryColor, secondaryColor, avgData, phase,
       }}>
         {player.number}
       </div>
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <span style={{ fontSize: 13, fontWeight: 600, color: C.text }}>{player.name}</span>
-        <span style={{ fontSize: 11, color: C.text3, marginLeft: 8 }}>↑ {player.minuteInDisplay ?? `${player.minuteIn}'`}</span>
+      <div style={{
+        flex: 1,
+        minWidth: 0,
+        display: 'flex',
+        alignItems: 'center',
+        whiteSpace: 'nowrap',
+        overflow: 'hidden',
+      }}>
+        <span style={{
+          fontSize: 13,
+          fontWeight: 600,
+          color: C.text,
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap',
+        }}>
+          {player.name}
+        </span>
+
+        <span style={{
+          fontSize: 11,
+          color: C.text3,
+          marginLeft: 7,
+          flexShrink: 0,
+          whiteSpace: 'nowrap',
+        }}>
+          ↑ {player.minuteInDisplay ?? `${player.minuteIn}'`}
+        </span>
       </div>
 
       <div style={{
-  width: 48,
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'flex-end',
-  marginRight: 4,
-  flexShrink: 0,
-}}>
+        width: hasPlayerEvent ? 48 : 8,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'flex-end',
+        marginRight: hasPlayerEvent ? 4 : 0,
+        flexShrink: 0,
+      }}>
   {player.goals > 0 && (
     <div style={{
       width: 48,
