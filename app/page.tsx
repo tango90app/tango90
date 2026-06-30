@@ -435,7 +435,19 @@ const roundOrder =
         'APERTURA · SEMIFINAL',
         'APERTURA · FINAL',
       ]
-    : []
+    : activeCompetitionKey === 'mundial'
+      ? [
+          'FASE DE GRUPOS · FECHA 1',
+          'FASE DE GRUPOS · FECHA 2',
+          'FASE DE GRUPOS · FECHA 3',
+          '16avos de final',
+          '8vos de final',
+          '4tos de final',
+          'SEMIFINAL',
+          '3er PUESTO',
+          'FINAL',
+        ]
+      : []
 
 const availableRounds = Array.from(
   new Set(
