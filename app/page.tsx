@@ -926,17 +926,51 @@ const dates = Object.keys(byDate).sort((a, b) => {
       <span style={{ fontFamily: OBJ, fontSize: 18, fontWeight: 700, color: 'rgba(255,255,255,0.18)', letterSpacing: '0.08em' }}>
         VS
       </span>
-    ) : (
-      <>
-        <span style={{ fontFamily: OBJ, fontSize: 26, fontWeight: 700, color: '#FFFFFF', minWidth: 22, textAlign: 'center' }}>
-          {match.home.score}
-        </span>
-        <span style={{ fontFamily: OBJ, fontSize: 18, color: 'rgba(255,255,255,0.25)', padding: '0 6px' }}>–</span>
-        <span style={{ fontFamily: OBJ, fontSize: 26, fontWeight: 700, color: '#FFFFFF', minWidth: 22, textAlign: 'center' }}>
-          {match.away.score}
-        </span>
-      </>
-    )}
+    ) : (() => {
+      const homeScore = match.home.score
+      const awayScore = match.away.score
+      const ps = match.penaltyShootout
+
+      let winner: 'home' | 'away' | null = null
+
+      if (typeof homeScore === 'number' && typeof awayScore === 'number') {
+        if (homeScore > awayScore) {
+          winner = 'home'
+        } else if (awayScore > homeScore) {
+          winner = 'away'
+        } else if (
+          ps &&
+          typeof ps.homeScore === 'number' &&
+          typeof ps.awayScore === 'number'
+        ) {
+          if (ps.homeScore > ps.awayScore) {
+            winner = 'home'
+          } else if (ps.awayScore > ps.homeScore) {
+            winner = 'away'
+          }
+        }
+      }
+
+      const homeScoreColor = winner === 'away'
+        ? 'rgba(255,255,255,0.38)'
+        : '#FFFFFF'
+
+      const awayScoreColor = winner === 'home'
+        ? 'rgba(255,255,255,0.38)'
+        : '#FFFFFF'
+
+      return (
+        <>
+          <span style={{ fontFamily: OBJ, fontSize: 26, fontWeight: 700, color: homeScoreColor, minWidth: 22, textAlign: 'center' }}>
+            {match.home.score}
+          </span>
+          <span style={{ fontFamily: OBJ, fontSize: 18, color: 'rgba(255,255,255,0.25)', padding: '0 6px' }}>–</span>
+          <span style={{ fontFamily: OBJ, fontSize: 26, fontWeight: 700, color: awayScoreColor, minWidth: 22, textAlign: 'center' }}>
+            {match.away.score}
+          </span>
+        </>
+      )
+    })()}
   </div>
 
   {/* Away crest */}
