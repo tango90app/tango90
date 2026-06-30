@@ -952,11 +952,11 @@ const dates = Object.keys(byDate).sort((a, b) => {
       }
 
       const homeScoreColor = winner === 'away'
-        ? 'rgba(255,255,255,0.38)'
+        ? 'rgba(255,255,255,0.45)'
         : '#FFFFFF'
 
       const awayScoreColor = winner === 'home'
-        ? 'rgba(255,255,255,0.38)'
+        ? 'rgba(255,255,255,0.45)'
         : '#FFFFFF'
 
       return (
