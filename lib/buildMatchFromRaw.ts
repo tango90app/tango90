@@ -24,13 +24,21 @@ type AFFixtureDetail = {
 
 type AFLeague  = { id: number; name: string; round: string }
 type AFTeamMeta = { id: number; name: string; logo: string }
-type AFGoals   = { home: number | null; away: number | null }
+type AFGoals = { home: number | null; away: number | null }
+
+type AFScore = {
+  halftime?: AFGoals | null
+  fulltime?: AFGoals | null
+  extratime?: AFGoals | null
+  penalty?: AFGoals | null
+}
 
 type AFFixtureResponse = {
   fixture: AFFixtureDetail
   league:  AFLeague
   teams:   { home: AFTeamMeta; away: AFTeamMeta }
   goals:   AFGoals
+  score?:  AFScore | null
 }
 
 type AFPlayerEntry = {
@@ -141,8 +149,14 @@ function resolvePlayerIdFromLineup(
 // ── Duración nominal del partido ──────────────────────────────────────────
 // FT → 90, AET / PEN → 120. No se usa elapsed ni stoppage time.
 
-function matchDuration(statusShort: string): 90 | 120 {
-  return ['AET', 'PEN'].includes(statusShort) ? 120 : 90
+function matchDuration(statusShort: string, elapsed: number | null): 90 | 120 {
+  if (statusShort === 'AET') return 120
+
+  if (statusShort === 'PEN') {
+    return elapsed !== null && elapsed > 105 ? 120 : 90
+  }
+
+  return 90
 }
 
 // ── Status interno ────────────────────────────────────────────────────────
@@ -269,6 +283,13 @@ function buildEvents(
 
     if (ev.type === 'Goal') {
       const detail = ev.detail?.toLowerCase() ?? ''
+      const comments = ev.comments?.toLowerCase() ?? ''
+
+      const isPenaltyShootout = comments.includes('penalty shootout')
+
+      if (isPenaltyShootout) {
+        continue
+      }
 
       const isMissedPenalty =
         detail.includes('missed penalty') ||
@@ -373,7 +394,7 @@ export function buildMatchFromRaw(row: RawFixtureRow): Match {
     throw new Error(`raw_fixture.response[0] vacío para fixture ${row.external_fixture_id}`)
   }
 
-  const { fixture: fx, league, teams, goals } = fixtureData
+  const { fixture: fx, league, teams, goals, score } = fixtureData
   const afEvents  = row.raw_events?.response  ?? []
   const afLineups = row.raw_lineups?.response ?? []
 
@@ -397,7 +418,7 @@ export function buildMatchFromRaw(row: RawFixtureRow): Match {
   }
 
   const status   = afStatusToInternal(fx.status.short)
-  const duration = matchDuration(fx.status.short)
+  const duration = matchDuration(fx.status.short, fx.status.elapsed)
 
   const dateObj = new Date(fx.date)
   const date = new Date(fx.date).toLocaleDateString('sv-SE', {
@@ -410,6 +431,17 @@ export function buildMatchFromRaw(row: RawFixtureRow): Match {
   if (status === 'finished') {
     match_end_at = new Date(dateObj.getTime() + duration * 60 * 1000).toISOString()
   }
+
+  const penaltyShootout =
+  score?.penalty?.home !== null &&
+  score?.penalty?.home !== undefined &&
+  score?.penalty?.away !== null &&
+  score?.penalty?.away !== undefined
+    ? {
+        homeScore: score.penalty.home,
+        awayScore: score.penalty.away,
+      }
+    : undefined
 
       const homeTangoTeam = getTeamByApiFootballId(teams.home.id)
   const awayTangoTeam = getTeamByApiFootballId(teams.away.id)
@@ -447,6 +479,7 @@ export function buildMatchFromRaw(row: RawFixtureRow): Match {
     referee:    { id: refId(fx.id), name: parseRefereeName(fx.referee) },
     rules:      defaultRules(),
     events:     buildEvents(afEvents, teams.home.id, homeLineup, awayLineup),
+    ...(penaltyShootout ? { penaltyShootout } : {}),
     ...(match_end_at ? { match_end_at } : {}),
     // periods: omitido — API-Football no provee endMinute por período.
     // processMatch funciona sin periods (usa 90/120 como matchEnd nominal).

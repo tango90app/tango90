@@ -13,7 +13,17 @@ const VOTING_ELIGIBILITY_THRESHOLD_MINUTES = 5
 // Si el partido no tiene `periods`, devuelve DEFAULT_MATCH_END_MINUTE (90).
 function getMatchEndMinute(match: Match): number {
   const p = match.periods
-  if (!p) return DEFAULT_MATCH_END_MINUTE
+
+  if (!p) {
+    const allPlayers = [...match.home.players, ...match.away.players]
+
+    const is120MinuteMatch =
+      allPlayers.some(player => player.starter && player.minutesPlayed >= 120) ||
+      match.events.some(event => event.minute > 105)
+
+    return is120MinuteMatch ? 120 : DEFAULT_MATCH_END_MINUTE
+  }
+
   return (
     p.extraTimeSecond?.endMinute ??
     p.extraTimeFirst?.endMinute ??
