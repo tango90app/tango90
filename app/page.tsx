@@ -440,9 +440,9 @@ const roundOrder =
           'FASE DE GRUPOS · FECHA 1',
           'FASE DE GRUPOS · FECHA 2',
           'FASE DE GRUPOS · FECHA 3',
-          '16avos de final',
-          '8vos de final',
-          '4tos de final',
+          '16vos DE FINAL',
+          '8vos DE FINAL',
+          '4tos DE FINAL',
           'SEMIFINAL',
           '3er PUESTO',
           'FINAL',
@@ -680,7 +680,6 @@ const dates = Object.keys(byDate).sort((a, b) => {
     }}
   >
     {COMPETITIONS
-      .filter(c => c.key === 'mundial')
       .map(c => (
       <Link
         key={c.key}
