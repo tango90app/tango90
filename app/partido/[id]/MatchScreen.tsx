@@ -1679,16 +1679,16 @@ function ScoreBadge({ score, eligible, cta }: { score: number | null; eligible: 
 // ── Voting Bottom Sheet — centred on desktop, Supabase-backed ────────────
 const RATINGS = [1,2,3,4,5,6,7,8,9,10]
 const RATING_DESCRIPTIONS: Record<number, string> = {
-  1: 'Desastre!',
+  1: 'Desastroso',
   2: 'Horrible',
-  3: 'Muy mal',
-  4: 'Flojo',
-  5: 'Intrascendente',
+  3: 'Pésimo',
+  4: 'Muy flojo',
+  5: 'Flojo',
   6: 'Cumplió',
-  7: 'Correcto',
-  8: 'Buen partido',
-  9: 'Muy buen partido',
-  10: 'Figura!',
+  7: 'Buen partido',
+  8: 'Muy buen partido',
+  9: 'Partidazo',
+  10: 'Figura absoluta',
 }
 const SHEET_MAX_W = 480
 
