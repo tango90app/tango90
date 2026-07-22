@@ -159,6 +159,15 @@ function normalizeRound(round?: string, competitionKey?: CompetitionKey) {
     }
   }
 
+    // ── SUDAMERICANA ──────────────────────────────────────────────
+if (competitionKey === 'sudamericana') {
+  if (r.includes('round of 32')) return 'PLAY-OFF'
+  if (r.includes('round of 16')) return '8vos de FINAL'
+  if (r.includes('quarter')) return '4tos de FINAL'
+  if (r.includes('semi')) return 'SEMIFINAL'
+  if (r === 'final') return 'FINAL'
+}
+
   // ── LPF ──────────────────────────────────────────────────────
   if (competitionKey === 'lpf') {
     const fechaMatch = r.match(/fecha\s*(\d+)/)
@@ -385,17 +394,26 @@ for (const row of voteRows ?? []) {
   voteCountsByMatchId[matchId] = (voteCountsByMatchId[matchId] ?? 0) + 1
 }
 
-  const activeCompetitionKey =
-    typeof searchParams?.competition === 'string'
-      ? (searchParams.competition as CompetitionKey)
-      : 'mundial'
-
-const activeCompetition =
-  COMPETITIONS.find(c => c.key === activeCompetitionKey) ?? COMPETITIONS[0]
-
-const visibleCompetitions = COMPETITIONS.filter(competition =>
+  const visibleCompetitions = COMPETITIONS.filter(competition =>
+  competition.key !== 'libertadores' &&
   allMatches.some(match => getCompetitionKey(match) === competition.key)
 )
+
+const requestedCompetitionKey =
+  typeof searchParams?.competition === 'string'
+    ? (searchParams.competition as CompetitionKey)
+    : null
+
+const activeCompetitionKey: CompetitionKey =
+  requestedCompetitionKey &&
+  visibleCompetitions.some(competition => competition.key === requestedCompetitionKey)
+    ? requestedCompetitionKey
+    : 'sudamericana'
+
+const activeCompetition =
+  visibleCompetitions.find(c => c.key === activeCompetitionKey) ??
+  visibleCompetitions[0] ??
+  COMPETITIONS[0]
 
 const filteredMatches = allMatches.filter(match =>
   getCompetitionKey(match) === activeCompetitionKey
@@ -435,6 +453,14 @@ const roundOrder =
         'APERTURA · SEMIFINAL',
         'APERTURA · FINAL',
       ]
+        : activeCompetitionKey === 'sudamericana'
+  ? [
+      'PLAY-OFF',
+      '8vos de FINAL',
+      '4tos de FINAL',
+      'SEMIFINAL',
+      'FINAL',
+    ]
     : activeCompetitionKey === 'mundial'
       ? [
           'FASE DE GRUPOS · FECHA 1',
