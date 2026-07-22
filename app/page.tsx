@@ -88,7 +88,7 @@ const COMPETITIONS = [
     key: 'sudamericana',
     label: 'COPA SUDAMERICANA',
     title: 'COPA CONMEBOL SUDAMERICANA',
-    logos: [],
+    logos: ['/logos/competitions/sudamericana.svg'],
   },
   {
     key: 'mundial',
