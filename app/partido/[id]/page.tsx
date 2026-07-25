@@ -24,6 +24,12 @@ if (!match) {
 }
   if (!match) notFound()
 
+    const { data: trackedFixture } = await supabaseServer
+  .from('tracked_fixtures')
+  .select('round')
+  .eq('internal_match_id', params.id)
+  .maybeSingle()
+
 const normalizeTeam = (team: any) => {
   const apiId = Number(String(team.id).replace('api-team-', ''))
   const mapped =
@@ -43,6 +49,7 @@ const normalizeTeam = (team: any) => {
 
 const normalizedMatch = {
   ...match,
+  round: trackedFixture?.round ?? match.round,
   home: normalizeTeam(match.home),
   away: normalizeTeam(match.away),
 }

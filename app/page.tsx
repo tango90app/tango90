@@ -71,6 +71,46 @@ function formatDate(dateStr: string) {
   const d = new Date(dateStr + 'T00:00:00')
   return d.toLocaleDateString('es-AR', { weekday: 'short', day: 'numeric', month: 'short' }).toUpperCase()
 }
+
+function getArgentinaDateString() {
+  return new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'America/Argentina/Buenos_Aires',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).format(new Date())
+}
+
+function addDaysToDate(dateStr: string, amount: number) {
+  const date = new Date(`${dateStr}T12:00:00`)
+  date.setDate(date.getDate() + amount)
+
+  return date.toLocaleDateString('en-CA', {
+    timeZone: 'America/Argentina/Buenos_Aires',
+  })
+}
+
+function formatFullDate(dateStr: string) {
+  const date = new Date(`${dateStr}T12:00:00`)
+
+  return date
+    .toLocaleDateString('es-AR', {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+      timeZone: 'America/Argentina/Buenos_Aires',
+    })
+    .toUpperCase()
+}
+
+function getDateTitle(selectedDate: string, todayDate: string) {
+  if (selectedDate === todayDate) return 'HOY'
+  if (selectedDate === addDaysToDate(todayDate, -1)) return 'AYER'
+  if (selectedDate === addDaysToDate(todayDate, 1)) return 'MAÑANA'
+
+  return formatFullDate(selectedDate)
+}
+
 const COMPETITIONS = [
   {
     key: 'lpf',
@@ -170,16 +210,46 @@ if (competitionKey === 'sudamericana') {
 
   // ── LPF ──────────────────────────────────────────────────────
   if (competitionKey === 'lpf') {
+    const clausuraFechaMatch =
+      r.match(/clausura\s*-\s*(?:fecha\s*)?(\d+)/)
+
+    if (clausuraFechaMatch) {
+      return `CLAUSURA · FECHA ${clausuraFechaMatch[1]}`
+    }
+
+    const aperturaFechaMatch =
+      r.match(/apertura\s*-\s*(?:fecha\s*)?(\d+)/)
+
+    if (aperturaFechaMatch) {
+      return `APERTURA · FECHA ${aperturaFechaMatch[1]}`
+    }
+
     const fechaMatch = r.match(/fecha\s*(\d+)/)
 
     if (fechaMatch) {
       return `APERTURA · FECHA ${fechaMatch[1]}`
     }
 
-    if (r.includes('round of 16')) return 'APERTURA · 8vos de FINAL'
-    if (r.includes('quarter')) return 'APERTURA · 4tos de FINAL'
-    if (r.includes('semi')) return 'APERTURA · SEMIFINAL'
-    if (r === 'final') return 'APERTURA · FINAL'
+    const tournamentName =
+      r.includes('clausura')
+        ? 'CLAUSURA'
+        : 'APERTURA'
+
+    if (r.includes('round of 16')) {
+      return `${tournamentName} · 8vos de FINAL`
+    }
+
+    if (r.includes('quarter')) {
+      return `${tournamentName} · 4tos de FINAL`
+    }
+
+    if (r.includes('semi')) {
+      return `${tournamentName} · SEMIFINAL`
+    }
+
+    if (r.includes('final')) {
+      return `${tournamentName} · FINAL`
+    }
   }
 
   // ── MUNDIAL ─────────────────────────────────────────────
@@ -211,8 +281,26 @@ if (competitionKey === 'mundial') {
   return round.toUpperCase()
 }
 
-function formatRoundLabel(round?: string, competitionKey?: CompetitionKey) {
-  return normalizeRound(round, competitionKey)
+function formatRoundLabel(
+  round?: string,
+  _competitionKey?: CompetitionKey
+) {
+  return round ?? ''
+}
+
+function getDailyRoundLabel(
+  matches: Match[],
+  competitionKey: CompetitionKey
+) {
+  const rounds = Array.from(
+    new Set(
+      matches
+        .map(match => normalizeRound(match.round, competitionKey))
+        .filter(Boolean)
+    )
+  )
+
+  return rounds.join(' / ')
 }
 
 function getMatchTimeLabel(match: Match) {
@@ -258,11 +346,43 @@ function getCountdownColor(match: Match) {
   return '#6B7280'
 }
 
+function sortDailyMatches(a: Match, b: Match) {
+  const getStatusPriority = (match: Match) => {
+    if (match.status === 'live') return 1
+    if (match.status === 'upcoming') return 2
+    if (match.status === 'finished') return 3
+    if (match.status === 'suspended') return 4
+    return 5
+  }
+
+  const priorityDifference =
+    getStatusPriority(a) - getStatusPriority(b)
+
+  if (priorityDifference !== 0) {
+    return priorityDifference
+  }
+
+  if (a.status === 'finished' && b.status === 'finished') {
+    const aEnd = a.match_end_at
+      ? new Date(a.match_end_at).getTime()
+      : 0
+
+    const bEnd = b.match_end_at
+      ? new Date(b.match_end_at).getTime()
+      : 0
+
+    return bEnd - aEnd
+  }
+
+  return a.time.localeCompare(b.time)
+}
+
 type HomeProps = {
   searchParams?: {
-  competition?: string
-  round?: string
-}
+    competition?: string
+    round?: string
+    date?: string
+  }
 }
 
 function mapTrackedFixtureStatus(status: string) {
@@ -322,13 +442,24 @@ away: normalizeTeam(m.away),
   const { data: trackedRows } = await supabaseServer
     .from('tracked_fixtures')
     .select('*')
-    .eq('published', false)
     .order('kickoff_at', { ascending: true })
+
+    const trackedRoundByMatchId: Record<string, string> = {}
+
+    for (const row of trackedRows ?? []) {
+      if (row.internal_match_id && row.round) {
+        trackedRoundByMatchId[row.internal_match_id] = row.round
+      }
+    }
 
     const apiMatchIds = new Set(apiMatches.map(m => m.id))
 
-    const trackedMatches: Match[] = (trackedRows ?? [])  
-      .filter((row: any) => !apiMatchIds.has(row.internal_match_id))
+    const trackedMatches: Match[] = (trackedRows ?? [])
+      .filter(
+        (row: any) =>
+          row.published === false &&
+          !apiMatchIds.has(row.internal_match_id)
+      )
       .map((row: any) => ({
         id: row.internal_match_id,
         date: new Date(row.kickoff_at).toLocaleDateString('sv-SE', {
@@ -378,7 +509,27 @@ away: {
     events: [],
   }))
 
-  const allMatches: Match[] = [...trackedMatches, ...apiMatches]
+  const correctedApiMatches: Match[] = apiMatches.map(match => ({
+    ...match,
+    round: trackedRoundByMatchId[match.id] ?? match.round,
+  }))
+
+const allMatches: Match[] = [...trackedMatches, ...correctedApiMatches]
+
+  const todayDate = getArgentinaDateString()
+
+const requestedDate =
+  typeof searchParams?.date === 'string'
+    ? searchParams.date
+    : null
+
+const selectedDate =
+  requestedDate && /^\d{4}-\d{2}-\d{2}$/.test(requestedDate)
+    ? requestedDate
+    : todayDate
+
+const previousDate = addDaysToDate(selectedDate, -1)
+const nextDate = addDaysToDate(selectedDate, 1)
 
   const matchIds = allMatches.map(m => m.id)
 
@@ -404,11 +555,18 @@ const requestedCompetitionKey =
     ? (searchParams.competition as CompetitionKey)
     : null
 
-const activeCompetitionKey: CompetitionKey =
+const validRequestedCompetitionKey =
   requestedCompetitionKey &&
   visibleCompetitions.some(competition => competition.key === requestedCompetitionKey)
     ? requestedCompetitionKey
-    : 'sudamericana'
+    : null
+
+const isDailyView = validRequestedCompetitionKey === null
+
+const activeCompetitionKey: CompetitionKey =
+  validRequestedCompetitionKey ??
+  visibleCompetitions[0]?.key ??
+  'lpf'
 
 const activeCompetition =
   visibleCompetitions.find(c => c.key === activeCompetitionKey) ??
@@ -419,40 +577,70 @@ const filteredMatches = allMatches.filter(match =>
   getCompetitionKey(match) === activeCompetitionKey
 )
 
-console.log(
-  'LPF TEST',
-  filteredMatches.slice(0, 10).map(m => ({
-    id: m.id,
-    status: m.status,
-    round: m.round,
-    match_end_at: m.match_end_at,
-  }))
+const dailyMatches = allMatches.filter(match =>
+  match.date === selectedDate
 )
+
+const dailyCompetitions = COMPETITIONS.filter(competition =>
+  dailyMatches.some(match =>
+    getCompetitionKey(match) === competition.key
+  )
+)
+
+const dailySections = dailyCompetitions.map(competition => ({
+  competition,
+  matches: dailyMatches
+    .filter(match =>
+      getCompetitionKey(match) === competition.key
+    )
+    .sort(sortDailyMatches),
+}))
 
 const roundOrder =
   activeCompetitionKey === 'lpf'
-    ? [
-        'APERTURA · FECHA 1',
-        'APERTURA · FECHA 2',
-        'APERTURA · FECHA 3',
-        'APERTURA · FECHA 4',
-        'APERTURA · FECHA 5',
-        'APERTURA · FECHA 6',
-        'APERTURA · FECHA 7',
-        'APERTURA · FECHA 8',
-        'APERTURA · FECHA 9',
-        'APERTURA · FECHA 10',
-        'APERTURA · FECHA 11',
-        'APERTURA · FECHA 12',
-        'APERTURA · FECHA 13',
-        'APERTURA · FECHA 14',
-        'APERTURA · FECHA 15',
-        'APERTURA · FECHA 16',
-        'APERTURA · 8vos de FINAL',
-        'APERTURA · 4tos de FINAL',
-        'APERTURA · SEMIFINAL',
-        'APERTURA · FINAL',
-      ]
+  ? [
+      'APERTURA · FECHA 1',
+      'APERTURA · FECHA 2',
+      'APERTURA · FECHA 3',
+      'APERTURA · FECHA 4',
+      'APERTURA · FECHA 5',
+      'APERTURA · FECHA 6',
+      'APERTURA · FECHA 7',
+      'APERTURA · FECHA 8',
+      'APERTURA · FECHA 9',
+      'APERTURA · FECHA 10',
+      'APERTURA · FECHA 11',
+      'APERTURA · FECHA 12',
+      'APERTURA · FECHA 13',
+      'APERTURA · FECHA 14',
+      'APERTURA · FECHA 15',
+      'APERTURA · FECHA 16',
+      'APERTURA · 8vos de FINAL',
+      'APERTURA · 4tos de FINAL',
+      'APERTURA · SEMIFINAL',
+      'APERTURA · FINAL',
+
+      'CLAUSURA · FECHA 1',
+      'CLAUSURA · FECHA 2',
+      'CLAUSURA · FECHA 3',
+      'CLAUSURA · FECHA 4',
+      'CLAUSURA · FECHA 5',
+      'CLAUSURA · FECHA 6',
+      'CLAUSURA · FECHA 7',
+      'CLAUSURA · FECHA 8',
+      'CLAUSURA · FECHA 9',
+      'CLAUSURA · FECHA 10',
+      'CLAUSURA · FECHA 11',
+      'CLAUSURA · FECHA 12',
+      'CLAUSURA · FECHA 13',
+      'CLAUSURA · FECHA 14',
+      'CLAUSURA · FECHA 15',
+      'CLAUSURA · FECHA 16',
+      'CLAUSURA · 8vos de FINAL',
+      'CLAUSURA · 4tos de FINAL',
+      'CLAUSURA · SEMIFINAL',
+      'CLAUSURA · FINAL',
+    ]
         : activeCompetitionKey === 'sudamericana'
   ? [
       'PLAY-OFF',
@@ -543,9 +731,13 @@ const nextRound =
     ? availableRounds[activeRoundIndex + 1]
     : null
 
-const roundMatches = activeRound
-  ? filteredMatches.filter(m => normalizeRound(m.round, activeCompetitionKey) === activeRound)
-  : filteredMatches
+const roundMatches = isDailyView
+  ? dailyMatches
+  : activeRound
+    ? filteredMatches.filter(
+        m => normalizeRound(m.round, activeCompetitionKey) === activeRound
+      )
+    : filteredMatches
 
 
   const byDate: Record<string, Match[]> = {}
@@ -632,6 +824,23 @@ const dates = Object.keys(byDate).sort((a, b) => {
   return pa.time - pb.time
 })
 
+const matchSections = isDailyView
+  ? dailySections.map(section => ({
+      key: section.competition.key,
+      title: section.competition.title,
+      subtitle: getDailyRoundLabel(
+        section.matches,
+        section.competition.key
+      ),
+      matches: section.matches,
+    }))
+  : dates.map(date => ({
+      key: date,
+      title: formatDate(date),
+      subtitle: '',
+      matches: byDate[date],
+    }))
+
   return (
     <div style={{ background: '#0B0B0F', minHeight: '100vh' }}>
       {/* App header */}
@@ -705,6 +914,25 @@ const dates = Object.keys(byDate).sort((a, b) => {
       margin: 0,
     }}
   >
+        <Link
+      href="/"
+      style={{
+        display: 'block',
+        textDecoration: 'none',
+        padding: '10px 12px',
+        borderRadius: 8,
+        fontFamily: PJS,
+        fontSize: 12,
+        fontWeight: 700,
+        letterSpacing: '0.06em',
+        textAlign: 'right',
+        color: isDailyView ? '#FBD005' : '#E5E7EB',
+        background: isDailyView ? 'rgba(251,208,5,0.10)' : 'transparent',
+      }}
+    >
+      PARTIDOS
+    </Link>
+
     {COMPETITIONS
       .map(c => (
       <Link
@@ -720,8 +948,10 @@ const dates = Object.keys(byDate).sort((a, b) => {
           fontWeight: 700,
           letterSpacing: '0.06em',
           textAlign: 'right',
-          color: c.key === activeCompetitionKey ? '#FBD005' : '#E5E7EB',
-          background: c.key === activeCompetitionKey ? 'rgba(251,208,5,0.10)' : 'transparent',
+          color: !isDailyView && c.key === activeCompetitionKey ? '#FBD005' : '#E5E7EB',
+          background: !isDailyView && c.key === activeCompetitionKey
+            ? 'rgba(251,208,5,0.10)'
+            : 'transparent',
         }}
       >
         {c.label}
@@ -735,89 +965,309 @@ const dates = Object.keys(byDate).sort((a, b) => {
       {/* Content */}
       <div style={{ maxWidth: 480, margin: '0 auto', padding: '0 16px', paddingBottom: 48 }}>
         {/* Section label */}
-        
-<div style={{ padding: '20px 0 14px', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
-  <div style={{
-    display: 'flex',
-    alignItems: 'center',
-    gap: 8,
-    fontFamily: OBJ,
-    fontSize: 12,
-    fontWeight: 600,
-    color: '#6B7280',
-    letterSpacing: '0.14em',
-  }}>
-    {activeCompetition.logos.map((logo, i) => (
-  <img
-    key={i}
-    src={logo}
-    alt=""
-    style={{ width: 36, height: 36, objectFit: 'contain' }}
-  />
-))}
-    <span>{activeCompetition.title}</span>
-  </div>
 
-  <div style={{
-    marginTop: 12,
-    display: 'grid',
-    gridTemplateColumns: '32px 1fr 32px',
-    alignItems: 'center',
-  }}>
-    {previousRound ? (
-  <Link
-    href={`/?competition=${activeCompetitionKey}&round=${encodeURIComponent(previousRound)}`}
+{isDailyView ? (
+  <div
     style={{
-  fontFamily: PJS,
-  color: '#F2F2F2',
-  fontSize: 24,
-  fontWeight: 700,
-  lineHeight: 1,
-  textAlign: 'left',
-  textDecoration: 'none'
-}}
+      padding: '20px 0 14px',
+      borderBottom: '1px solid rgba(255,255,255,0.07)',
+    }}
   >
-    ‹
-  </Link>
-) : (
-  <span style={{ fontFamily: PJS, color: 'rgba(107,114,128,0.25)', fontSize: 18, textAlign: 'left' }}>‹</span>
-)}
-    <div style={{ fontFamily: OBJ, fontSize: 18, fontWeight: 600, color: '#FFFFFF', letterSpacing: '0.08em', textAlign: 'center' }}>
-     {formatRoundLabel(activeRound, activeCompetitionKey)} 
-
+    <div
+      style={{
+        fontFamily: PJS,
+        fontSize: 12,
+        fontWeight: 600,
+        color: '#6B7280',
+        letterSpacing: '0.14em',
+      }}
+    >
+      PARTIDOS
     </div>
-    {nextRound ? (
-  <Link
-    href={`/?competition=${activeCompetitionKey}&round=${encodeURIComponent(nextRound)}`}
-    style={{
-  fontFamily: PJS,
-  color: '#F2F2F2',
-  fontSize: 24,
-  fontWeight: 700,
-  lineHeight: 1,
-  textAlign: 'left',
-  textDecoration: 'none'
-}}
-  >
-    ›
-  </Link>
-) : (
-  <span style={{ fontFamily: PJS, color: 'rgba(107,114,128,0.25)', fontSize: 18, textAlign: 'right' }}>›</span>
-)}
+
+    <div
+      style={{
+        marginTop: 12,
+        display: 'grid',
+        gridTemplateColumns: '32px 1fr 32px',
+        alignItems: 'center',
+      }}
+    >
+      <Link
+        href={`/?date=${previousDate}`}
+        style={{
+          fontFamily: PJS,
+          color: '#F2F2F2',
+          fontSize: 24,
+          fontWeight: 700,
+          lineHeight: 1,
+          textAlign: 'left',
+          textDecoration: 'none',
+        }}
+      >
+        ‹
+      </Link>
+
+      <div style={{ textAlign: 'center' }}>
+        <div
+          style={{
+            fontFamily: OBJ,
+            fontSize: 18,
+            fontWeight: 600,
+            color: '#FFFFFF',
+            letterSpacing: '0.08em',
+          }}
+        >
+          {getDateTitle(selectedDate, todayDate)}
+        </div>
+
+        <div
+          style={{
+            marginTop: 4,
+            fontFamily: PJS,
+            fontSize: 11,
+            fontWeight: 600,
+            color: '#6B7280',
+            letterSpacing: '0.08em',
+          }}
+        >
+          {formatFullDate(selectedDate)}
+        </div>
+      </div>
+
+      <Link
+        href={`/?date=${nextDate}`}
+        style={{
+          fontFamily: PJS,
+          color: '#F2F2F2',
+          fontSize: 24,
+          fontWeight: 700,
+          lineHeight: 1,
+          textAlign: 'right',
+          textDecoration: 'none',
+        }}
+      >
+        ›
+      </Link>
+    </div>
   </div>
-</div>
+) : (
+  <div
+    style={{
+      padding: '20px 0 14px',
+      borderBottom: '1px solid rgba(255,255,255,0.07)',
+    }}
+  >
+    <div
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 8,
+        fontFamily: OBJ,
+        fontSize: 12,
+        fontWeight: 600,
+        color: '#6B7280',
+        letterSpacing: '0.14em',
+      }}
+    >
+      {activeCompetition.logos.map((logo, i) => (
+        <img
+          key={i}
+          src={logo}
+          alt=""
+          style={{ width: 36, height: 36, objectFit: 'contain' }}
+        />
+      ))}
+
+      <span>{activeCompetition.title}</span>
+    </div>
+
+    <div
+      style={{
+        marginTop: 12,
+        display: 'grid',
+        gridTemplateColumns: '32px 1fr 32px',
+        alignItems: 'center',
+      }}
+    >
+      {previousRound ? (
+        <Link
+          href={`/?competition=${activeCompetitionKey}&round=${encodeURIComponent(previousRound)}`}
+          style={{
+            fontFamily: PJS,
+            color: '#F2F2F2',
+            fontSize: 24,
+            fontWeight: 700,
+            lineHeight: 1,
+            textAlign: 'left',
+            textDecoration: 'none',
+          }}
+        >
+          ‹
+        </Link>
+      ) : (
+        <span
+          style={{
+            fontFamily: PJS,
+            color: 'rgba(107,114,128,0.25)',
+            fontSize: 18,
+            textAlign: 'left',
+          }}
+        >
+          ‹
+        </span>
+      )}
+
+      <div
+        style={{
+          fontFamily: OBJ,
+          fontSize: 18,
+          fontWeight: 600,
+          color: '#FFFFFF',
+          letterSpacing: '0.08em',
+          textAlign: 'center',
+        }}
+      >
+        {formatRoundLabel(activeRound, activeCompetitionKey)}
+      </div>
+
+      {nextRound ? (
+        <Link
+          href={`/?competition=${activeCompetitionKey}&round=${encodeURIComponent(nextRound)}`}
+          style={{
+            fontFamily: PJS,
+            color: '#F2F2F2',
+            fontSize: 24,
+            fontWeight: 700,
+            lineHeight: 1,
+            textAlign: 'right',
+            textDecoration: 'none',
+          }}
+        >
+          ›
+        </Link>
+      ) : (
+        <span
+          style={{
+            fontFamily: PJS,
+            color: 'rgba(107,114,128,0.25)',
+            fontSize: 18,
+            textAlign: 'right',
+          }}
+        >
+          ›
+        </span>
+      )}
+    </div>
+  </div>
+)}
 
         {/* Match list */}
-        {dates.map(date => (
-          <div key={date}>
-            <div style={{ padding: '12px 0 6px', display: 'flex', alignItems: 'center', gap: 10 }}>
-              <span style={{ fontFamily: PJS, fontSize: 11, fontWeight: 600, color: '#6B7280', letterSpacing: '0.08em' }}>
-                {formatDate(date)}
-              </span>
-              <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.06)' }} />
+
+{isDailyView && matchSections.length === 0 && (
+  <div
+    style={{
+      padding: '48px 20px',
+      textAlign: 'center',
+    }}
+  >
+    <div
+      style={{
+        fontFamily: OBJ,
+        fontSize: 18,
+        fontWeight: 600,
+        color: '#F2F2F2',
+        letterSpacing: '0.04em',
+      }}
+    >
+      NO HAY PARTIDOS
+    </div>
+
+    <div
+      style={{
+        marginTop: 8,
+        fontFamily: PJS,
+        fontSize: 12,
+        fontWeight: 500,
+        color: '#6B7280',
+        lineHeight: 1.5,
+      }}
+    >
+      No hay partidos programados para esta fecha.
+    </div>
+
+    {selectedDate !== todayDate && (
+      <Link
+        href="/"
+        style={{
+          display: 'inline-flex',
+          marginTop: 20,
+          padding: '10px 16px',
+          borderRadius: 8,
+          background: '#FBD005',
+          color: '#0B0B0F',
+          fontFamily: PJS,
+          fontSize: 11,
+          fontWeight: 800,
+          letterSpacing: '0.06em',
+          textDecoration: 'none',
+        }}
+      >
+        VOLVER A HOY
+      </Link>
+    )}
+  </div>
+)}
+
+{matchSections.map(section => (
+          <div key={section.key}>
+            <div
+              style={{
+                padding: '16px 0 8px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 10,
+              }}
+            >
+              <div>
+                <div
+                  style={{
+                    fontFamily: PJS,
+                    fontSize: 11,
+                    fontWeight: 700,
+                    color: '#F2F2F2',
+                    letterSpacing: '0.08em',
+                  }}
+                >
+                  {section.title}
+                </div>
+
+                {section.subtitle && (
+                  <div
+                    style={{
+                      marginTop: 3,
+                      fontFamily: PJS,
+                      fontSize: 10,
+                      fontWeight: 600,
+                      color: '#6B7280',
+                      letterSpacing: '0.08em',
+                    }}
+                  >
+                    {section.subtitle}
+                  </div>
+                )}
+              </div>
+
+              <div
+                style={{
+                  flex: 1,
+                  height: 1,
+                  background: 'rgba(255,255,255,0.06)',
+                }}
+              />
             </div>
 
-            {byDate[date].map(match => (
+            {section.matches.map(match => (
               <Link
   key={match.id}
   href={match.status === 'finished' ? `/partido/${match.id}` : '#'}

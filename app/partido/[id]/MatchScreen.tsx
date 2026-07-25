@@ -41,12 +41,21 @@ function getDisplayScore(
 
 // ── Rating helpers ────────────────────────────────────────────────────────
 function ratingBg(score: number): string {
-  if (score < 4) return '#B91D34'       // rojo
-  if (score < 7) return '#F39C12'       // amarillo
-  if (score < 10) return '#1DB954'       // verde
-  return '#FBD005'                      // dorado
+  if (score < 2) return '#000000'  // 1 — negro
+  if (score < 3) return '#8F0800'  // 2 — rojo oscuro
+  if (score < 4) return '#DC0C00'  // 3 — rojo intermedio
+  if (score < 5) return '#F04438'  // 4 — rojo claro
+  if (score < 6) return '#ED7E07'  // 5 — naranja
+  if (score < 7) return '#D9AF00'  // 6 — amarillo
+  if (score < 8) return '#00C424'  // 7 — verde
+  if (score < 9) return '#00ADC4'  // 8 — celeste
+  if (score < 10) return '#374DF5' // 9 — azul
+  return '#FBD005'                 // 10 — dorado
 }
-function ratingLabel(score: number): string { return score.toFixed(2) }
+
+function ratingLabel(score: number): string {
+  return score.toFixed(2)
+}
 
 // ── Storage helpers — same keys as existing system, do NOT change ─────────
 function readVote(entityId: string): number | null {
@@ -278,18 +287,48 @@ function formatRoundLabel(round?: string, competitionKey?: string) {
   }
 
   // ── LPF ──────────────────────────────────────────────────────
-  if (competitionKey === 'lpf') {
-    const fechaMatch = r.match(/fecha\s*(\d+)/)
+if (competitionKey === 'lpf') {
+  const clausuraFechaMatch =
+    r.match(/clausura\s*-\s*(?:fecha\s*)?(\d+)/)
 
-    if (fechaMatch) {
-      return `APERTURA · FECHA ${fechaMatch[1]}`
-    }
-
-    if (r.includes('round of 16')) return 'APERTURA · OCTAVOS DE FINAL'
-    if (r.includes('quarter')) return 'APERTURA · CUARTOS DE FINAL'
-    if (r.includes('semi')) return 'APERTURA · SEMIFINAL'
-    if (r === 'final') return 'APERTURA · FINAL'
+  if (clausuraFechaMatch) {
+    return `CLAUSURA · FECHA ${clausuraFechaMatch[1]}`
   }
+
+  const aperturaFechaMatch =
+    r.match(/apertura\s*-\s*(?:fecha\s*)?(\d+)/)
+
+  if (aperturaFechaMatch) {
+    return `APERTURA · FECHA ${aperturaFechaMatch[1]}`
+  }
+
+  const fechaMatch = r.match(/fecha\s*(\d+)/)
+
+  if (fechaMatch) {
+    return `APERTURA · FECHA ${fechaMatch[1]}`
+  }
+
+  const tournamentName =
+    r.includes('clausura')
+      ? 'CLAUSURA'
+      : 'APERTURA'
+
+  if (r.includes('round of 16')) {
+    return `${tournamentName} · OCTAVOS DE FINAL`
+  }
+
+  if (r.includes('quarter')) {
+    return `${tournamentName} · CUARTOS DE FINAL`
+  }
+
+  if (r.includes('semi')) {
+    return `${tournamentName} · SEMIFINAL`
+  }
+
+  if (r.includes('final')) {
+    return `${tournamentName} · FINAL`
+  }
+}
 
   return round.toUpperCase()
 }
