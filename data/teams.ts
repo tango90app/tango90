@@ -723,6 +723,30 @@ export const SOUTH_AMERICAN_CLUBS: TangoTeam[] = [
     primaryColor: '#000000',
     secondaryColor: '#FFFFFF',
   },
+  {
+    teamKey: 'atletico-mineiro',
+    type: 'club',
+    apiFootballId: 1062,
+    officialName: 'Clube Atléico Mineiro',
+    displayName: 'Atlético Mineiro',
+    abbreviation: 'CAM',
+    countryCode: 'BRA',
+    crestPath: '/logos/teams/atletico-mineiro.svg',
+    primaryColor: '#000000',
+    secondaryColor: '#FFFFFF',
+  },
+  {
+  teamKey: 'montevideo-city-torque',
+  type: 'club',
+  apiFootballId: 2365,
+  officialName: 'Montevideo City Torque',
+  displayName: 'Montevideo City Torque',
+  abbreviation: 'MCT',
+  countryCode: 'URU',
+  crestPath: '/logos/teams/montevideo-city-torque.svg',
+  primaryColor: '#86BBF0',
+  secondaryColor: '#FFFFFF',
+},
 ]
 
 export const NATIONAL_TEAMS: TangoTeam[] = [
